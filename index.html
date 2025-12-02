@@ -1,0 +1,1332 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>PIC – Professional Inventory Control</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Estilos básicos -->
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    :root {
+      --bg-main: #050816;
+      --bg-card: #101827;
+      --accent: #00b4d8;
+      --accent-soft: rgba(0, 180, 216, 0.12);
+      --accent-strong: #06d6a0;
+      --text-main: #e5e7eb;
+      --text-muted: #9ca3af;
+      --border-soft: #1f2933;
+      --danger: #ef4444;
+      --warn: #f59e0b;
+      --ok: #10b981;
+    }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+      background: radial-gradient(circle at top, #111827 0, #020617 45%, #000 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    /* Splash */
+    #splash {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at top, #020617 0, #000 55%);
+      z-index: 50;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    #splash-logo {
+      width: 170px;
+      height: auto;
+      filter: drop-shadow(0 0 25px rgba(0, 180, 216, 0.7));
+    }
+    #splash-text {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    #splash-progress {
+      width: 230px;
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.9);
+      overflow: hidden;
+      box-shadow: 0 0 25px rgba(0, 0, 0, 0.6);
+    }
+    #splash-bar {
+      width: 0;
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-strong));
+      animation: loadBar 1.4s ease-out forwards;
+    }
+    @keyframes loadBar {
+      from { width: 0; }
+      to   { width: 100%; }
+    }
+
+    /* App shell */
+    #app {
+      display: none;
+      width: min(1200px, 100%);
+      padding: 1.5rem;
+    }
+    .card {
+      background: radial-gradient(circle at top left,
+        rgba(15, 23, 42, 0.9) 0,
+        rgba(12, 19, 35, 0.98) 45%,
+        #020617 100%);
+      border-radius: 18px;
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      box-shadow:
+        0 24px 60px rgba(0, 0, 0, 0.75),
+        0 0 0 1px rgba(15, 23, 42, 0.9);
+      padding: 1.75rem 2rem 2rem;
+      backdrop-filter: blur(18px);
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      gap: 1.25rem;
+    }
+    .header-main {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .header-logo {
+      width: 80px;
+      height: auto;
+    }
+    .header-title {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    .header-title h1 {
+      margin: 0;
+      font-size: 1.4rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    .header-title h2 {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--text-main);
+    }
+    .header-sub {
+      margin: 0;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .badge-version {
+      padding: 0.45rem 0.85rem;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--accent-strong);
+      font-size: 0.75rem;
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    /* Top controls */
+    .top-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+      align-items: center;
+    }
+    .btn {
+      border-radius: 999px;
+      border: none;
+      padding: 0.55rem 1.1rem;
+      font-size: 0.85rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      cursor: pointer;
+      font-weight: 500;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      transition: transform 0.08s ease-out, box-shadow 0.08s ease-out,
+        background 0.12s ease-out;
+      white-space: nowrap;
+    }
+    .btn-primary {
+      background: radial-gradient(circle at top left,
+        var(--accent) 0,
+        #0284c7 40%,
+        #0369a1 100%);
+      color: #e5f4ff;
+      box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.4),
+        0 16px 40px rgba(37, 99, 235, 0.45);
+    }
+    .btn-warning {
+      background: radial-gradient(circle at top left,
+        #f97316 0,
+        #ea580c 40%,
+        #c2410c 100%);
+      color: #fff7ed;
+      box-shadow: 0 0 0 1px rgba(248, 153, 72, 0.6),
+        0 16px 40px rgba(248, 153, 72, 0.35);
+    }
+    .btn-secondary {
+      background: radial-gradient(circle at top left,
+        #6366f1 0,
+        #4f46e5 40%,
+        #4338ca 100%);
+      color: #eef2ff;
+      box-shadow: 0 0 0 1px rgba(129, 140, 248, 0.7),
+        0 16px 40px rgba(99, 102, 241, 0.45);
+    }
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.7);
+    }
+    .btn:active {
+      transform: translateY(0);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+    }
+
+    .date-range,
+    .filters-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+      margin-bottom: 0.75rem;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+    .date-range label,
+    .filters-row label {
+      margin-right: 0.2rem;
+    }
+    input[type="date"],
+    select,
+    .search-input {
+      background: rgba(15, 23, 42, 0.9);
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      padding: 0.35rem 0.75rem;
+      color: var(--text-main);
+      font-size: 0.8rem;
+      outline: none;
+      min-width: 130px;
+    }
+    input[type="date"]:focus,
+    select:focus,
+    .search-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.5);
+    }
+
+    .search-input {
+      min-width: 220px;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border-soft);
+      margin: 1rem 0 0.75rem;
+    }
+    .tab-btn {
+      padding: 0.55rem 1rem;
+      font-size: 0.82rem;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      border-bottom: 2px solid transparent;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .tab-btn.active {
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+    .tab-panel {
+      display: none;
+    }
+    .tab-panel.active {
+      display: block;
+    }
+
+    /* Tables */
+    .table-wrapper {
+      border-radius: 14px;
+      border: 1px solid rgba(31, 41, 55, 0.9);
+      overflow: hidden;
+      box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.95);
+      background: radial-gradient(circle at top,
+        rgba(15, 23, 42, 0.96) 0,
+        #020617 60%);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.78rem;
+    }
+    thead {
+      background: linear-gradient(
+        90deg,
+        rgba(15, 23, 42, 0.95),
+        rgba(15, 23, 42, 0.8)
+      );
+    }
+    th,
+    td {
+      padding: 0.4rem 0.6rem;
+      border-bottom: 1px solid rgba(31, 41, 55, 0.85);
+      text-align: left;
+      white-space: nowrap;
+    }
+    th {
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    tbody tr:nth-child(even) {
+      background: rgba(15, 23, 42, 0.75);
+    }
+    tbody tr:nth-child(odd) {
+      background: rgba(15, 23, 42, 0.95);
+    }
+    .col-codigo {
+      width: 80px;
+      font-weight: 600;
+      color: #e5f4ff;
+    }
+    .col-descripcion {
+      min-width: 260px;
+      max-width: 420px;
+      white-space: normal;
+    }
+    .col-um {
+      width: 60px;
+      text-align: center;
+    }
+    .col-num {
+      width: 70px;
+      text-align: right;
+    }
+    .col-input,
+    .col-units {
+      width: 120px;
+      text-align: right;
+    }
+    .input-count {
+      width: 100%;
+      background: rgba(15, 23, 42, 0.8);
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      padding: 0.22rem 0.55rem;
+      color: var(--text-main);
+      font-size: 0.78rem;
+      text-align: right;
+      outline: none;
+    }
+    .input-count:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.6);
+    }
+
+    .col-diff {
+      width: 80px;
+      text-align: right;
+    }
+    .num-neutral {
+      color: var(--text-muted);
+    }
+    .num-positive {
+      color: var(--warn);
+    }
+    .num-negative {
+      color: var(--danger);
+    }
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.12rem 0.55rem;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .status-ok {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--ok);
+      border: 1px solid rgba(16, 185, 129, 0.55);
+    }
+    .status-warn {
+      background: rgba(245, 158, 11, 0.08);
+      color: var(--warn);
+      border: 1px solid rgba(245, 158, 11, 0.6);
+    }
+    .status-alert {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--danger);
+      border: 1px solid rgba(239, 68, 68, 0.7);
+    }
+    @media (max-width: 900px) {
+      .card {
+        padding: 1.2rem 1rem 1.5rem;
+      }
+      .header-main {
+        flex-direction: row;
+      }
+      .header-logo {
+        width: 65px;
+      }
+      .header-title h1 {
+        font-size: 1.1rem;
+      }
+      .header-title h2 {
+        font-size: 0.9rem;
+      }
+      .header-sub {
+        font-size: 0.75rem;
+      }
+    }
+/* Scroll vertical de la tabla */
+.table-wrapper {
+  max-height: 480px;
+  overflow-y: auto;
+}
+
+/* Asegurar ancho completo */
+.table-wrapper table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* Encabezados congelados */
+.table-wrapper thead th {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: #0b1120;
+}
+
+  </style>
+</head>
+<body>
+  <!-- Splash con logo -->
+  <div id="splash">
+    <!-- 🔁 Cambia el src por la ruta real de tu logo -->
+    <img id="splash-logo" src="img/logo_pic.png" alt="Luquisa logo" />
+    <div id="splash-text">Cargando PIC<span id="dots">...</span></div>
+    <div id="splash-progress"><div id="splash-bar"></div></div>
+  </div>
+
+  <!-- App -->
+  <div id="app">
+    <div class="card">
+      <header class="header">
+        <div class="header-main">
+          <!-- 🔁 Cambia el src por la ruta real de tu logo -->
+          <img
+            class="header-logo"
+            src="img/logo_pic.png"
+            alt="Luquisa"
+          />
+          <div class="header-title">
+            <h1>PIC</h1>
+            <h2>Professional Inventory Control</h2>
+            <p class="header-sub">
+              Módulo de toma física de inventario · Versión 1.0
+            </p>
+          </div>
+        </div>
+        <span class="badge-version">Luquisa · 26 Aniversario</span>
+      </header>
+
+      <div class="top-controls">
+        <button id="btnLoadExcel" class="btn btn-primary">
+          📂 Cargar archivo Sage (Excel)
+        </button>
+        <button id="btnReset" class="btn btn-warning">
+          ♻️ Reiniciar conteos
+        </button>
+        <button id="btnExportExcel" class="btn btn-secondary">
+          💾 Exportar archivo actualizado
+        </button>
+        <input
+          type="file"
+          id="excelInput"
+          accept=".xlsx,.xls"
+          style="display: none"
+        />
+<span 
+  id="contadorProgreso"
+  style="margin-left:12px; font-size:12px; color:#9ca3af;"
+>
+  0 de 0 productos contados
+</span>
+<label style="margin-left:12px; font-size:12px; color:#9ca3af;">
+  Por:
+  <input
+    type="text"
+    id="nombreInspector"
+    placeholder="Nombre del responsable"
+    style="margin-left:6px; padding:3px 8px; border-radius:12px; border:1px solid #555; font-size:12px; background:transparent; color:#fff; width:180px;"
+  />
+</label>
+
+      </div>
+
+      <!-- Rango de fechas -->
+      <div class="date-range">
+        <span>Período de inventario:</span>
+        <label for="dateFrom">Desde:</label>
+        <input type="date" id="dateFrom" />
+        <label for="dateTo">Hasta:</label>
+        <input type="date" id="dateTo" />
+      </div>
+
+      <!-- Filtros -->
+      <div class="filters-row">
+        <label for="filterMarca">Marca:</label>
+        <select id="filterMarca">
+          <option value="__ALL__">Todas</option>
+        </select>
+
+        <label for="filterEsp">Especialidad:</label>
+        <select id="filterEsp">
+          <option value="__ALL__">Todas</option>
+        </select>
+
+        <input
+          type="text"
+          id="searchCajas"
+          class="search-input"
+          placeholder="Buscar por código o descripción"
+        />
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="tabCajas">
+          Inventario en cajas
+        </button>
+        <button class="tab-btn" data-tab="tabSueltas">
+          Unidades sueltas
+        </button>
+      </div>
+
+      <!-- Paneles -->
+      <div id="tabCajas" class="tab-panel active">
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Descripción</th>
+                <th>U/M</th>
+                <th>Sistema</th>
+                <th>Físico (cajas)</th>
+                <th>Unid. sueltas</th>
+                <th>Diferencia</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyCajas"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="tabSueltas" class="tab-panel">
+        <div class="filters-row" style="margin-top: 0.25rem;">
+          <input
+            type="text"
+            id="searchSueltas"
+            class="search-input"
+            placeholder="Buscar por código o descripción (sueltas)"
+          />
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Descripción</th>
+                <th>Unid. sueltas</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody id="tbodySueltas"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Librería Excel -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <script>
+    // ---------- CONFIGURACIÓN SAGE ----------
+    const SAGE_CONFIG = {
+      colCodigo: "Item ID",
+      colDescripcion: "Description for Sales",
+      colUnidad: "Stocking U/M",
+      colMarca: "Item Type",
+      colSistema: "Qty on Hand",
+      colCuentaFisica: "Cuenta Fisica",
+      colDiferencia: "Diferencia",
+      colCosto: "Last Unit Cost",
+      colEspecialidad: "Location"
+    };
+
+    const SAGE_PATTERNS = {
+      colCodigo: ["item id", "codigo", "code"],
+      colDescripcion: ["description for sales", "description", "descripcion"],
+      colUnidad: ["stocking", "u/m", "unidad"],
+      colMarca: ["item type", "marca", "brand"],
+      colSistema: ["qty on hand", "existencia"],
+      colCuentaFisica: ["cuenta fisica", "conteo fisico", "physical count"],
+      colDiferencia: ["diferencia", "difference", "variance"],
+      colCosto: ["last unit cost", "unit cost", "ultimo costo"],
+      colEspecialidad: ["location", "locacion", "ubicacion"]
+    };
+
+    const SUPERVISOR_PIN = "2025"; // 🔁 Cambia la clave si deseas
+
+    // Estado global
+    let H = {};
+    let sageHeaders = [];
+    let sageRows = [];
+    let inventoryCajas = [];
+    let sageIndexByCodigo = new Map();
+
+    // ---------- Normalizador de encabezados ----------
+    function normalizeHeader(h) {
+      return String(h || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "") // quita tildes
+        .replace(/[\[\]\(\):]/g, " ")
+        .replace(/\s+/g, " ")
+        .trim()
+        .lowerCase?.() || String(h || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[\[\]\(\):]/g, " ")
+        .replace(/\s+/g, " ")
+        .trim()
+        .toLowerCase();
+    }
+
+    // ---------- Splash ----------
+    const splash = document.getElementById("splash");
+    const dotsSpan = document.getElementById("dots");
+    const app = document.getElementById("app");
+
+    let dotCount = 1;
+    const dotsInterval = setInterval(() => {
+      dotCount = (dotCount % 3) + 1;
+      dotsSpan.textContent = ".".repeat(dotCount);
+    }, 500);
+
+    setTimeout(() => {
+      clearInterval(dotsInterval);
+      splash.style.display = "none";
+      app.style.display = "block";
+    }, 3500);
+
+    // ---------- Tabs ----------
+    const tabButtons = document.querySelectorAll(".tab-btn");
+    const tabPanels = document.querySelectorAll(".tab-panel");
+    tabButtons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const target = btn.dataset.tab;
+        tabButtons.forEach((b) => b.classList.remove("active"));
+        tabPanels.forEach((p) => p.classList.remove("active"));
+        btn.classList.add("active");
+        document.getElementById(target).classList.add("active");
+      });
+    });
+
+    // ---------- DOM ----------
+    const btnLoadExcel = document.getElementById("btnLoadExcel");
+    const btnReset = document.getElementById("btnReset");
+    const btnExportExcel = document.getElementById("btnExportExcel");
+    const excelInput = document.getElementById("excelInput");
+    const tbodyCajas = document.getElementById("tbodyCajas");
+    const tbodySueltas = document.getElementById("tbodySueltas");
+    const searchCajas = document.getElementById("searchCajas");
+    const searchSueltas = document.getElementById("searchSueltas");
+    const filterMarca = document.getElementById("filterMarca");
+    const filterEsp = document.getElementById("filterEsp");
+    const dateFrom = document.getElementById("dateFrom");
+    const dateTo = document.getElementById("dateTo");
+
+    // Fechas por defecto (1er día del mes a hoy)
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, "0");
+    const dd = String(today.getDate()).padStart(2, "0");
+    dateTo.value = `${yyyy}-${mm}-${dd}`;
+    dateFrom.value = `${yyyy}-${mm}-01`;
+
+    // ---------- Buscar fila de encabezados ----------
+    function findHeaderRowIndex(aoa) {
+      let bestIndex = 0;
+      let bestScore = -1;
+
+      for (let i = 0; i < aoa.length; i++) {
+        const row = aoa[i];
+        const cells = row.map((c) => normalizeHeader(c));
+        let score = 0;
+
+        for (const patterns of Object.values(SAGE_PATTERNS)) {
+          for (const cell of cells) {
+            for (const p of patterns) {
+              if (p && cell.includes(p)) {
+                score++;
+                break;
+              }
+            }
+          }
+        }
+        if (score > bestScore) {
+          bestScore = score;
+          bestIndex = i;
+        }
+      }
+      return bestIndex;
+    }
+
+    // ---------- Resolver columnas por nombre ----------
+    function resolveSageColumns() {
+      H = {};
+      const normMap = {};
+      sageHeaders.forEach((h) => {
+        normMap[h] = normalizeHeader(h);
+      });
+
+      Object.entries(SAGE_PATTERNS).forEach(([key, patterns]) => {
+        let foundOriginal = null;
+
+        outer: for (const [original, norm] of Object.entries(normMap)) {
+          for (const pattern of patterns) {
+            if (pattern && norm.includes(pattern)) {
+              foundOriginal = original;
+              break outer;
+            }
+          }
+        }
+        H[key] = foundOriginal || null;
+      });
+
+      const criticalKeys = [
+        "colCodigo",
+        "colDescripcion",
+        "colUnidad",
+        "colMarca",
+        "colSistema"
+      ];
+      const missingCritical = [];
+      criticalKeys.forEach((key) => {
+        if (!H[key]) {
+          missingCritical.push(SAGE_CONFIG[key] || key);
+        }
+      });
+
+      if (missingCritical.length) {
+        alert(
+          "Atención: faltan columnas CRÍTICAS en el Excel:\n\n" +
+            missingCritical.join("\n") +
+            "\n\nLa tabla puede quedar incompleta. Revisa el archivo."
+        );
+      }
+    }
+
+    // ---------- Botón cargar ----------
+    btnLoadExcel.addEventListener("click", () => {
+      excelInput.click();
+    });
+
+    excelInput.addEventListener("change", (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: "array" });
+        const firstSheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[firstSheetName];
+
+        const aoa = XLSX.utils.sheet_to_json(sheet, {
+          header: 1,
+          defval: ""
+        });
+        if (!aoa.length) {
+          alert("El archivo está vacío.");
+          return;
+        }
+
+        const headerRowIndex = findHeaderRowIndex(aoa);
+        sageHeaders = aoa[headerRowIndex].map((c) => String(c));
+        sageRows = [];
+        sageIndexByCodigo.clear();
+
+        alert(
+          "Fila de encabezados detectada: " +
+            (headerRowIndex + 1) +
+            "\n\nEncabezados:\n" +
+            sageHeaders.join(" | ")
+        );
+
+        resolveSageColumns();
+
+        for (let i = headerRowIndex + 1; i < aoa.length; i++) {
+          const rowArr = aoa[i];
+          if (rowArr.every((cell) => String(cell).trim() === "")) continue;
+          const obj = {};
+          sageHeaders.forEach((h, idx) => {
+            obj[h] = rowArr[idx];
+          });
+          sageRows.push(obj);
+        }
+
+        // Mapear a inventario interno
+inventoryCajas = sageRows.map((row, index) => {
+  const codigo      = H.colCodigo      ? row[H.colCodigo]      : "";
+  const descripcion = H.colDescripcion ? row[H.colDescripcion] : "";
+  const unidad      = H.colUnidad      ? String(row[H.colUnidad]) : "";
+  const marca       = H.colMarca       ? row[H.colMarca]       : "";
+
+  
+  let sistema = "";
+  if (H.colSistema) {
+    const rawSis = row[H.colSistema];
+
+    if (rawSis !== undefined && rawSis !== null && String(rawSis).trim() !== "") {
+      const n = Number(rawSis);
+     
+      sistema = Number.isFinite(n) ? n : "";
+    } else {
+      sistema = ""; // acá respetas que el Excel viene en blanco
+    }
+  }
+
+  
+  let costo = 0;
+  if (H.colCosto) {
+    const rawCosto = row[H.colCosto];
+    const n = Number(rawCosto);
+    costo = Number.isFinite(n) ? n : 0;
+  }
+
+  let especialidad = "Varios";
+  if (H.colEspecialidad && row[H.colEspecialidad] !== undefined) {
+    const rawEsp = String(row[H.colEspecialidad] || "").trim();
+    if (rawEsp !== "") especialidad = rawEsp;
+  }
+
+  return {
+    codigo,
+    descripcion,
+    unidad,      // U/M
+    sistema,     // Qty on Hand EXACTO del Excel
+    marca,
+    costo,
+    especialidad,
+  };
+});
+
+renderTableCajas();
+renderTableSueltas();
+actualizarProgreso();  
+
+        populateFilters();
+        renderTableCajas();
+        renderTableSueltas();
+
+        alert(
+          "Se cargaron " +
+            inventoryCajas.length +
+            " productos desde el archivo de Sage."
+        );
+      };
+
+      reader.readAsArrayBuffer(file);
+    });
+function actualizarProgreso() {
+  const tbody = document.getElementById("tbodyCajas");
+  const contadorProgresoEl = document.getElementById("contadorProgreso");
+
+  if (!tbody || !contadorProgresoEl) return;
+
+  const filas = tbody.querySelectorAll("tr");
+  const total = filas.length;
+  let contados = 0;
+
+  filas.forEach((tr) => {
+    const inputs = tr.querySelectorAll("input");
+    let tieneValor = false;
+
+    inputs.forEach((inp) => {
+      if (inp.value !== "" && inp.value !== null && inp.value !== undefined) {
+        tieneValor = true;
+      }
+    });
+
+    if (tieneValor) {
+      contados++;
+    }
+  });
+
+  contadorProgresoEl.textContent =
+    contados + " de " + total + " productos contados";
+}
+
+
+    // ---------- Filtros ----------
+    function populateFilters() {
+      const marcas = new Set();
+      const especialidades = new Set(["Varios"]);
+
+      inventoryCajas.forEach((item) => {
+        if (item.marca) marcas.add(item.marca);
+        if (item.especialidad) especialidades.add(item.especialidad);
+      });
+
+      filterMarca.innerHTML = '<option value="__ALL__">Todas</option>';
+      marcas.forEach((m) => {
+        const opt = document.createElement("option");
+        opt.value = m;
+        opt.textContent = m;
+        filterMarca.appendChild(opt);
+      });
+
+      filterEsp.innerHTML = '<option value="__ALL__">Todas</option>';
+      especialidades.forEach((e) => {
+        const opt = document.createElement("option");
+        opt.value = e;
+        opt.textContent = e;
+        filterEsp.appendChild(opt);
+      });
+    }
+
+    filterMarca.addEventListener("change", () => {
+      renderTableCajas();
+      renderTableSueltas();
+    });
+    filterEsp.addEventListener("change", () => {
+      renderTableCajas();
+      renderTableSueltas();
+    });
+
+    searchCajas.addEventListener("input", renderTableCajas);
+    searchSueltas.addEventListener("input", renderTableSueltas);
+
+    // ---------- Diferencias ----------
+    function calculateDiff(sistema, fisico) {
+      if (fisico === null || fisico === undefined || fisico === "") return null;
+      return sistema - fisico;
+    }
+    function formatDiff(diff) {
+      if (diff === null) return "–";
+      if (diff === 0) return "0";
+      return diff.toString();
+    }
+    function diffClass(diff) {
+      if (diff === null) return "num-neutral";
+      if (diff === 0) return "num-neutral";
+      if (diff > 0) return "num-positive";
+      return "num-negative";
+    }
+    function applyStatusStyle(el, diff) {
+      el.className = "status-pill";
+      if (diff === null) {
+        el.textContent = "Pendiente";
+        el.classList.add("status-warn");
+        return;
+      }
+      if (diff === 0) {
+        el.textContent = "OK";
+        el.classList.add("status-ok");
+      } else if (Math.abs(diff) <= 2) {
+        el.textContent = "Revisar";
+        el.classList.add("status-warn");
+      } else {
+        el.textContent = "Alerta";
+        el.classList.add("status-alert");
+      }
+    }
+
+    // ---------- Render tablas ----------
+    function renderTableCajas() {
+      tbodyCajas.innerHTML = "";
+      const texto = (searchCajas.value || "").toLowerCase();
+      const fMarca = filterMarca.value;
+      const fEsp = filterEsp.value;
+
+      inventoryCajas.forEach((item, index) => {
+        if (!item.codigo && !item.descripcion) return;
+
+        const hayFiltro = texto.length > 0;
+        const coincideTexto =
+          !hayFiltro ||
+          item.codigo.toLowerCase().includes(texto) ||
+          item.descripcion.toLowerCase().includes(texto);
+        if (!coincideTexto) return;
+
+        if (fMarca !== "__ALL__" && item.marca !== fMarca) return;
+        if (fEsp !== "__ALL__" && item.especialidad !== fEsp) return;
+
+        const tr = document.createElement("tr");
+
+        const tdCodigo = document.createElement("td");
+        tdCodigo.className = "col-codigo";
+        tdCodigo.textContent = item.codigo;
+        tr.appendChild(tdCodigo);
+
+        const tdDesc = document.createElement("td");
+        tdDesc.className = "col-descripcion";
+        tdDesc.textContent = item.descripcion;
+        tr.appendChild(tdDesc);
+
+        const tdUM = document.createElement("td");
+        tdUM.className = "col-um";
+        tdUM.textContent = item.unidad || "";
+        tr.appendChild(tdUM);
+
+        const tdSistema = document.createElement("td");
+tdSistema.className = "col-num";
+
+if (
+  item.sistema === "" ||
+  item.sistema === null ||
+  item.sistema === undefined ||
+  Number.isNaN(item.sistema)
+) {
+  tdSistema.textContent = "";
+} else {
+  tdSistema.textContent = item.sistema;
+}
+
+tr.appendChild(tdSistema);
+
+
+
+        const tdFisico = document.createElement("td");
+tdFisico.className = "col-input";
+
+const inputCajas = document.createElement("input");
+inputCajas.type = "number";
+inputCajas.min = "0";
+inputCajas.step = "1";
+inputCajas.className = "input-count";
+inputCajas.value = item.fisicoCajas != null ? item.fisicoCajas : "";
+inputCajas.dataset.index = index.toString();
+
+inputCajas.addEventListener("input", (e) => {
+  const idx = Number(e.target.dataset.index);
+  const val = e.target.value === "" ? "" : Number(e.target.value);
+  inventoryCajas[idx].fisicoCajas = val;
+});
+
+tdFisico.appendChild(inputCajas);
+tr.appendChild(tdFisico);
+
+        const tdUnid = document.createElement("td");
+        tdUnid.className = "col-units";
+        const inputUnid = document.createElement("input");
+        inputUnid.type = "number";
+        inputUnid.min = "0";
+        inputUnid.step = "1";
+        inputUnid.className = "input-count";
+        inputUnid.value =
+          item.fisicoUnidades !== null && item.fisicoUnidades !== undefined
+            ? item.fisicoUnidades
+            : "";
+        inputUnid.dataset.index = index.toString();
+        inputUnid.dataset.field = "unidades";
+        tdUnid.appendChild(inputUnid);
+        tr.appendChild(tdUnid);
+
+        const tdDiff = document.createElement("td");
+        const diff = calculateDiff(item.sistema, item.fisicoCajas);
+        tdDiff.textContent = formatDiff(diff);
+        tdDiff.className = "col-diff " + diffClass(diff);
+        tr.appendChild(tdDiff);
+
+        const tdStatus = document.createElement("td");
+        const statusSpan = document.createElement("span");
+        applyStatusStyle(statusSpan, diff);
+        tdStatus.appendChild(statusSpan);
+        tr.appendChild(tdStatus);
+
+        inputCajas.addEventListener("change", (e) => {
+          handleCountChange(index, "cajas", e.target, tdDiff, statusSpan);
+        });
+        inputUnid.addEventListener("change", (e) => {
+          handleCountChange(index, "unidades", e.target, tdDiff, statusSpan);
+        });
+
+        tbodyCajas.appendChild(tr);
+      });
+    }
+
+    function renderTableSueltas() {
+      tbodySueltas.innerHTML = "";
+      const texto = (searchSueltas.value || "").toLowerCase();
+      const fMarca = filterMarca.value;
+      const fEsp = filterEsp.value;
+
+      inventoryCajas.forEach((item) => {
+        if (!item.codigo && !item.descripcion) return;
+
+        const hayFiltro = texto.length > 0;
+        const coincideTexto =
+          !hayFiltro ||
+          item.codigo.toLowerCase().includes(texto) ||
+          item.descripcion.toLowerCase().includes(texto);
+        if (!coincideTexto) return;
+
+        if (fMarca !== "__ALL__" && item.marca !== fMarca) return;
+        if (fEsp !== "__ALL__" && item.especialidad !== fEsp) return;
+
+        const tr = document.createElement("tr");
+
+        const tdCodigo = document.createElement("td");
+        tdCodigo.className = "col-codigo";
+        tdCodigo.textContent = item.codigo;
+        tr.appendChild(tdCodigo);
+
+        const tdDesc = document.createElement("td");
+        tdDesc.className = "col-descripcion";
+        tdDesc.textContent = item.descripcion;
+        tr.appendChild(tdDesc);
+
+        const tdUnid = document.createElement("td");
+        tdUnid.className = "col-units";
+        tdUnid.textContent =
+          item.fisicoUnidades !== null && item.fisicoUnidades !== undefined
+            ? item.fisicoUnidades
+            : "";
+        tr.appendChild(tdUnid);
+
+        const tdStatus = document.createElement("td");
+        const statusSpan = document.createElement("span");
+        statusSpan.className = "status-pill";
+
+        if (item.fisicoUnidades && item.fisicoUnidades > 0) {
+          statusSpan.textContent = "Con sueltas";
+          statusSpan.classList.add("status-warn");
+        } else {
+          statusSpan.textContent = "Sin sueltas";
+          statusSpan.classList.add("status-ok");
+        }
+
+        tdStatus.appendChild(statusSpan);
+        tr.appendChild(tdStatus);
+
+        tbodySueltas.appendChild(tr);
+      });
+    }
+
+    // ---------- Manejo de cambios con PIN ----------
+    function handleCountChange(index, field, inputEl, tdDiff, statusSpan) {
+      const item = inventoryCajas[index];
+      const raw = inputEl.value;
+      const nuevo = raw === "" ? null : Number(raw);
+
+      const isCajas = field === "cajas";
+      const lockFlag = isCajas ? "lockCajas" : "lockUnidades";
+      const prev = isCajas ? item.fisicoCajas : item.fisicoUnidades;
+
+      // Primera vez: sin PIN
+      if (!item[lockFlag]) {
+        if (isCajas) {
+          item.fisicoCajas = nuevo;
+          syncWithSage(item);
+          const diff = calculateDiff(item.sistema, item.fisicoCajas);
+          tdDiff.textContent = formatDiff(diff);
+          tdDiff.className = "col-diff " + diffClass(diff);
+          applyStatusStyle(statusSpan, diff);
+        } else {
+          item.fisicoUnidades = nuevo;
+        }
+        item[lockFlag] = true;
+renderTableSueltas();
+actualizarProgreso();   
+return;
+
+      }
+
+      // No cambió el valor
+      if (nuevo === prev) return;
+
+      // Segunda vez en adelante: pide PIN
+      const pin = prompt(
+        "Este conteo ya fue ingresado. Ingrese la clave de supervisor para modificarlo:"
+      );
+      if (pin === SUPERVISOR_PIN) {
+        if (isCajas) {
+          item.fisicoCajas = nuevo;
+          syncWithSage(item);
+          const diff = calculateDiff(item.sistema, item.fisicoCajas);
+          tdDiff.textContent = formatDiff(diff);
+          tdDiff.className = "col-diff " + diffClass(diff);
+          applyStatusStyle(statusSpan, diff);
+        } else {
+          item.fisicoUnidades = nuevo;
+        }
+        renderTableSueltas();
+      } else {
+        alert("Clave incorrecta. El valor no fue modificado.");
+        inputEl.value = prev ?? "";
+      }
+	actualizarProgreso();
+    }
+
+    // ---------- Sincronizar con filas originales ----------
+    function syncWithSage(item) {
+      const idx = sageIndexByCodigo.get(item.codigo);
+      if (idx === undefined) return;
+      const row = sageRows[idx];
+      const diff = calculateDiff(item.sistema, item.fisicoCajas);
+
+      if (H.colCuentaFisica) {
+        row[H.colCuentaFisica] =
+          item.fisicoCajas === null || item.fisicoCajas === undefined
+            ? ""
+            : item.fisicoCajas;
+      }
+      if (H.colDiferencia) {
+        row[H.colDiferencia] =
+          diff === null || diff === undefined ? "" : diff;
+      }
+    }
+
+    // ---------- Botón Reiniciar ----------
+    btnReset.addEventListener("click", () => {
+      if (!inventoryCajas.length) {
+        alert("Primero carga un archivo de Sage.");
+        return;
+actualizarProgreso();
+      }
+      const ok = confirm(
+        "¿Seguro que deseas reiniciar TODOS los conteos físicos?\nEsta acción no se puede deshacer."
+      );
+      if (!ok) return;
+
+      inventoryCajas.forEach((item) => {
+        item.fisicoCajas = null;
+        item.fisicoUnidades = null;
+        item.lockCajas = false;
+        item.lockUnidades = false;
+      });
+
+      sageRows.forEach((row) => {
+        if (H.colCuentaFisica) row[H.colCuentaFisica] = "";
+        if (H.colDiferencia) row[H.colDiferencia] = "";
+      });
+
+      renderTableCajas();
+      renderTableSueltas();
+    });
+
+    // ---------- Botón Exportar ----------
+   btnExportExcel.addEventListener("click", () => {
+  if (!sageRows || !sageRows.length) {
+    alert("Primero carga un archivo de Sage.");
+    return;
+  }
+
+  const inputNombre = document.getElementById("nombreInspector");
+  if (!inputNombre) {
+    alert("No se encontró el campo del responsable.");
+    return;
+  }
+
+  let nombrePersona = inputNombre.value.trim();
+  if (!nombrePersona) {
+    alert("Escribe el nombre del responsable.");
+    return;
+  }
+
+  nombrePersona = nombrePersona.replace(/[\\\/:*?"<>|]/g, "_");
+
+  if (Array.isArray(inventoryCajas)) {
+    inventoryCajas.forEach((item, index) => {
+      const row = sageRows[index];
+      if (!row) return;
+
+      if (H.colSistema && item.sistema !== undefined) {
+        row[H.colSistema] = item.sistema;
+      }
+
+      if (H.colCuentaFisica) {
+        row[H.colCuentaFisica] = item.fisicoCajas != null ? item.fisicoCajas : "";
+      }
+
+      if (H.colDiferencia) {
+        const sisRaw = item.sistema;
+        const fisRaw = item.fisicoCajas;
+
+        let diff = "";
+        if (
+          sisRaw !== "" &&
+          sisRaw !== null &&
+          sisRaw !== undefined &&
+          fisRaw !== "" &&
+          fisRaw !== null &&
+          fisRaw !== undefined
+        ) {
+          const sis = Number(sisRaw);
+          const fis = Number(fisRaw);
+          if (Number.isFinite(sis) && Number.isFinite(fis)) {
+            diff = sis - fis;
+          }
+        }
+
+        row[H.colDiferencia] = diff === "" ? "" : diff;
+      }
+    });
+  }
+
+  const aoa = [];
+  aoa.push(sageHeaders);
+
+  sageRows.forEach((row) => {
+    const rowArr = sageHeaders.map((h) => row[h] ?? "");
+    aoa.push(rowArr);
+  });
+
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Inventario");
+
+  const fecha = new Date().toISOString().slice(0, 10);
+  const nombreArchivo = `Inventario_${nombrePersona}_${fecha}.xlsx`;
+
+  XLSX.writeFile(wb, nombreArchivo);
+});
+
+
+  </script>
+</body>
+</html>
