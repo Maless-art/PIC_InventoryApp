@@ -1210,33 +1210,58 @@ tr.appendChild(tdFisico);
     }
 
     // ---------- Manejo de cambios con PIN ----------
-    function handleCountChange(index, tipo, inputEl, tdDiff, statusSpan) {
-  const item = inventoryCajas[index];
+let bloqueandoCambio = false;
 
-  const valorAnterior =
-    tipo === "cajas"
-      ? (item.fisicoCajas ?? "")
-      : (item.fisicoUnidades ?? "");
+function handleCountChange(index, tipo, inputEl, tdDiff, statusSpan) {
+  if (bloqueandoCambio) return;
+  bloqueandoCambio = true;
 
-  const nuevoValor = inputEl.value === "" ? "" : Number(inputEl.value);
+  try {
+    const item = inventoryCajas[index];
 
-  const esPrimerConteo =
-    valorAnterior === "" ||
-    valorAnterior === null ||
-    typeof valorAnterior === "undefined";
+    const valorAnterior =
+      tipo === "cajas"
+        ? (item.fisicoCajas ?? "")
+        : (item.fisicoUnidades ?? "");
 
-  // Si NO es primer conteo y el valor cambió → pedir clave
-  if (!esPrimerConteo && nuevoValor !== valorAnterior) {
-    const pass = prompt(
-      "Para modificar un conteo existente, ingresa la clave de autorización:"
-    );
+    const nuevoValor = inputEl.value === "" ? "" : Number(inputEl.value);
 
-    if (pass !== "2025") {
-      inputEl.value = valorAnterior === "" ? "" : valorAnterior;
-      return;
+    const esPrimerConteo =
+      valorAnterior === "" ||
+      valorAnterior === null ||
+      typeof valorAnterior === "undefined";
+
+    if (!esPrimerConteo && nuevoValor !== valorAnterior) {
+      const pass = prompt(
+        "Para modificar un conteo existente, ingresa la clave de autorización:"
+      );
+
+      if (pass !== "2025") {
+        inputEl.value = valorAnterior === "" ? "" : valorAnterior;
+        return;
+      }
     }
-  }
 
+    if (tipo === "cajas") {
+      item.fisicoCajas = nuevoValor === "" ? null : nuevoValor;
+    } else {
+      item.fisicoUnidades = nuevoValor === "" ? null : nuevoValor;
+    }
+
+    const diff = calculateDiff(item.sistema, item.fisicoCajas);
+    tdDiff.textContent = formatDiff(diff);
+    tdDiff.className = "col-diff " + diffClass(diff);
+
+    applyStatusStyle(statusSpan, diff);
+
+    actualizarProgreso();
+    guardarEstadoPIC();
+  } finally {
+    setTimeout(() => {
+      bloqueandoCambio = false;
+    }, 50);
+  }
+}
   // Actualizar modelo
   if (tipo === "cajas") {
     item.fisicoCajas = nuevoValor === "" ? null : nuevoValor;
