@@ -1301,8 +1301,10 @@ btnReset.addEventListener("click", () => {
   );
   if (!ok) return;
 
-   localStorage.removeItem("PIC_ESTADO");
+  // Borrar el estado guardado en el navegador
+  localStorage.removeItem("PIC_ESTADO");
 
+  // Aquí abajo sigue tu lógica de reinicio
   inventoryCajas.forEach((item) => {
     item.fisicoCajas = null;
     item.fisicoUnidades = null;
@@ -1319,7 +1321,6 @@ btnReset.addEventListener("click", () => {
   renderTableSueltas();
   actualizarProgreso();
 });
-
 
       inventoryCajas.forEach((item) => {
         item.fisicoCajas = null;
