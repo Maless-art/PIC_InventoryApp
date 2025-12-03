@@ -1,0 +1,20 @@
+{
+  "name": "PIC - Professional Inventory Control",
+  "short_name": "PIC",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#020617",
+  "theme_color": "#020617",
+  "icons": [
+    {
+      "src": "logo_pic.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "logo_pic.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
