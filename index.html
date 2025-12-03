@@ -1214,64 +1214,30 @@ inputUnid.onblur = () => {
     // ---------- Manejo de cambios con PIN ----------
 
 
+// ----------- Manejo de cambios (SIN PIN, versión estable) -----------
 function handleCountChange(index, tipo, inputEl, tdDiff, statusSpan) {
   const item = inventoryCajas[index];
 
-  // --- CANDADO REAL ANTI DOBLE PIN ---
-  if (inputEl.dataset.pinLock === "1") return;
-
-  const prevRaw = inputEl.dataset.prevValor;
-  const esPrimerConteo = typeof prevRaw === "undefined";
-
-  const valorAnterior = esPrimerConteo
-    ? null
-    : (prevRaw === "" ? null : Number(prevRaw));
-
+  // Valor nuevo que el usuario dejó
   const nuevoValor =
     inputEl.value === "" ? null : Number(inputEl.value);
 
-  const cambioReal =
-    valorAnterior !== nuevoValor &&
-    !(valorAnterior === null && nuevoValor === null);
-
-  // 🔒 SOLO en cambio real posterior pide PIN
-  if (!esPrimerConteo && cambioReal) {
-    inputEl.dataset.pinLock = "1";   // bloquea doble disparo inmediato
-
-    const pass = prompt(
-      "Para modificar un conteo existente, ingresa la clave de autorización:"
-    );
-
-    if (pass !== "2025") {
-      inputEl.value = prevRaw ?? "";
-      inputEl.dataset.pinLock = "0";
-      return;
-    }
-
-    // Libera bloqueo tras validación correcta
-    setTimeout(() => {
-      inputEl.dataset.pinLock = "0";
-    }, 0);
-  }
-
-  // Guardar valor aceptado como referencia
-  inputEl.dataset.prevValor =
-    nuevoValor === null ? "" : String(nuevoValor);
-
-  // Guardar en memoria
+  // Guardar en modelo
   if (tipo === "cajas") {
     item.fisicoCajas = nuevoValor;
   } else {
     item.fisicoUnidades = nuevoValor;
   }
 
-  // Recalcular diferencia
+  // Recalcular diferencia con las CAJAS
   const diff = calculateDiff(item.sistema, item.fisicoCajas);
   tdDiff.textContent = formatDiff(diff);
   tdDiff.className = "col-diff " + diffClass(diff);
 
+  // Actualizar estado visual
   applyStatusStyle(statusSpan, diff);
 
+  // Progreso y guardado
   actualizarProgreso();
   guardarEstadoPIC();
 }
