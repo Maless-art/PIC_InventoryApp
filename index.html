@@ -1246,27 +1246,19 @@ function handleCountChange(index, tipo, inputEl, tdDiff, statusSpan) {
     item.fisicoUnidades = nuevoValor === "" ? null : nuevoValor;
   }
 
-  
-  applyStatusStyle(statusSpan, diff);
+  // Recalcular diferencia
+const diff = calculateDiff(item.sistema, item.fisicoCajas);
+tdDiff.textContent = formatDiff(diff);
+tdDiff.className = "col-diff " + diffClass(diff);
 
-  // Guardar
-  actualizarProgreso();
-  guardarEstadoPIC();
+// Estado visual
+applyStatusStyle(statusSpan, diff);
+
+// Guardar
+actualizarProgreso();
+guardarEstadoPIC();
 }
 
-
-  // Recalcular diferencia SIEMPRE
-  const diff = calculateDiff(item.sistema, item.fisicoCajas);
-  tdDiff.textContent = formatDiff(diff);
-  tdDiff.className = "col-diff " + diffClass(diff);
-
-  // Actualizar estado
-  applyStatusStyle(statusSpan, diff);
-
-  // Guardar cambios y refrescar progreso
-  actualizarProgreso();
-  guardarEstadoPIC();
-}
 
     // ---------- Sincronizar con filas originales ----------
     function syncWithSage(item) {
