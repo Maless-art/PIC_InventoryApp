@@ -1333,8 +1333,7 @@ btnReset.addEventListener("click", () => {
   );
   if (!ok) return;
 
-  // Borrar el estado guardado en el navegador
-  localStorage.removeItem("PIC_ESTADO");
+    localStorage.removeItem("PIC_ESTADO");
 
   // Lógica de reinicio
   inventoryCajas.forEach((item) => {
@@ -1468,15 +1467,14 @@ document.addEventListener("change", function (e) {
         console.error("Error registrando el service worker", err);
       });
   }
+// ===============================
+// 💾 GUARDADO REAL DE CONTEOS
+// ===============================
+
 function guardarEstadoPIC() {
   const estado = {
-    cajas: document.getElementById("tbodyCajas")?.innerHTML || "",
-    sueltas: document.getElementById("tbodySueltas")?.innerHTML || "",
-    responsable: document.getElementById("inputResponsable")?.value || "",
-    fechaDesde: document.getElementById("fechaDesde")?.value || "",
-    fechaHasta: document.getElementById("fechaHasta")?.value || "",
-    marca: document.getElementById("selectMarca")?.value || "",
-    especialidad: document.getElementById("selectEspecialidad")?.value || ""
+    cajas: inventoryCajas,
+    responsable: document.getElementById("nombreInspector")?.value || ""
   };
 
   localStorage.setItem("PIC_ESTADO", JSON.stringify(estado));
@@ -1488,29 +1486,31 @@ function cargarEstadoPIC() {
 
   const estado = JSON.parse(data);
 
-  if (document.getElementById("tbodyCajas")) {
-    document.getElementById("tbodyCajas").innerHTML = estado.cajas || "";
+  if (estado.cajas && Array.isArray(estado.cajas)) {
+    inventoryCajas = estado.cajas;
+    renderTableCajas();
+    renderTableSueltas();
   }
 
-  if (document.getElementById("tbodySueltas")) {
-    document.getElementById("tbodySueltas").innerHTML = estado.sueltas || "";
+  if (estado.responsable && document.getElementById("nombreInspector")) {
+    document.getElementById("nombreInspector").value = estado.responsable;
   }
 
-  if (document.getElementById("inputResponsable"))
-    document.getElementById("inputResponsable").value = estado.responsable || "";
-
-  if (document.getElementById("fechaDesde"))
-    document.getElementById("fechaDesde").value = estado.fechaDesde || "";
-
-  if (document.getElementById("fechaHasta"))
-    document.getElementById("fechaHasta").value = estado.fechaHasta || "";
-
-  if (document.getElementById("selectMarca"))
-    document.getElementById("selectMarca").value = estado.marca || "";
-
-  if (document.getElementById("selectEspecialidad"))
-    document.getElementById("selectEspecialidad").value = estado.especialidad || "";
+  actualizarProgreso();
 }
+
+// Guardar AUTOMÁTICAMENTE cuando escribes
+document.addEventListener("input", function (e) {
+  if (e.target.classList.contains("input-count")) {
+    guardarEstadoPIC();
+  }
+});
+
+// Cargar AUTOMÁTICAMENTE al abrir la app
+window.addEventListener("load", function () {
+  cargarEstadoPIC();
+});
+
 
 document.addEventListener("input", function (e) {
   if (e.target.classList.contains("input-count")) {
