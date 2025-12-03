@@ -1145,21 +1145,6 @@ tr.appendChild(tdFisico);
         tbodyCajas.appendChild(tr);
       });
 
-document.addEventListener("focusin", function (e) {
-  if (!e.target.classList.contains("input-count")) return;
-
-  if (sessionStorage.getItem("pic-auth-ok") === "1") return;
-
-  const pass = prompt("Ingrese la contraseña para editar el conteo:");
-
-  if (pass !== "2025") {  
-    e.target.blur();
-    return;
-  }
-
-  sessionStorage.setItem("pic-auth-ok", "1");
-});
-
     }
 
     function renderTableSueltas() {
@@ -1397,6 +1382,35 @@ actualizarProgreso();
   const nombreArchivo = `Inventario_${nombrePersona}_${fecha}.xlsx`;
 
   XLSX.writeFile(wb, nombreArchivo);
+});
+// ====== SEGURIDAD SOLO AL EDITAR UN VALOR ======
+let valorAnteriorConteo = "";
+
+document.addEventListener("focusin", function (e) {
+  if (!e.target.classList.contains("input-count")) return;
+  valorAnteriorConteo = e.target.value || "";
+});
+
+document.addEventListener("change", function (e) {
+  if (!e.target.classList.contains("input-count")) return;
+
+  const nuevoValor = e.target.value || "";
+
+  // Si antes estaba vacío y ahora hay algo → primer conteo (SIN contraseña)
+  if (valorAnteriorConteo === "" && nuevoValor !== "") {
+    return;
+  }
+
+  // Si no cambió realmente el valor → no hace nada
+  if (valorAnteriorConteo === nuevoValor) {
+    return;
+  }
+
+  const pass = prompt("Ingrese la contraseña para modificar un conteo:");
+
+  if (pass !== "2025") {   // <<< SI TU CLAVE ES OTRA, LA CAMBIO POR TI
+    e.target.value = valorAnteriorConteo;
+  }
 });
 
 
