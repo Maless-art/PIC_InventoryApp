@@ -1246,18 +1246,14 @@ function handleCountChange(index, tipo, inputEl, tdDiff, statusSpan) {
     item.fisicoUnidades = nuevoValor === "" ? null : nuevoValor;
   }
 
-  // Recalcular diferencia
-  const diff = calculateDiff(item.sistema, item.fisicoCajas);
-  tdDiff.textContent = formatDiff(diff);
-  tdDiff.className = "col-diff " + diffClass(diff);
-
-  // Estado visual
+  
   applyStatusStyle(statusSpan, diff);
 
   // Guardar
   actualizarProgreso();
   guardarEstadoPIC();
 }
+
 
   // Recalcular diferencia SIEMPRE
   const diff = calculateDiff(item.sistema, item.fisicoCajas);
