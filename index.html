@@ -425,7 +425,8 @@
   background: #0b1120;
 }
 
-/* Versión CELULAR: sin scroll horizontal y solo columnas clave */
+
+/* Versión CELULAR: sin scroll horizontal y columnas clave */
 /* Versión CELULAR: sin scroll horizontal y columnas clave */
 @media (max-width: 768px) {
   .table-wrapper {
@@ -446,31 +447,35 @@
     word-break: break-word;
   }
 
-  /* Dejamos visibles:
-     1 = Código
-     2 = Descripción
-     3 = Estado
-     última = (ahí debe ir el CONTEO FÍSICO)
+  /* Ocultamos todo por defecto en móvil */
+  .table-wrapper th,
+  .table-wrapper td {
+    display: none;
+  }
+
+  /* MOSTRAR SOLO:
+     - 1: Código
+     - 2: Descripción
+     - 3: U/M
+     - Estado (si quieres verlo, por su posición)
+     - Conteo físico: la columna marcada con .col-conteo
   */
+
   .table-wrapper th:nth-child(1),
   .table-wrapper td:nth-child(1),
   .table-wrapper th:nth-child(2),
   .table-wrapper td:nth-child(2),
   .table-wrapper th:nth-child(3),
   .table-wrapper td:nth-child(3),
-  .table-wrapper th:last-child,
-  .table-wrapper td:last-child {
+  .table-wrapper th:nth-child(4),
+  .table-wrapper td:nth-child(4),
+  .table-wrapper th.col-conteo,
+  .table-wrapper td.col-conteo {
     display: table-cell;
   }
 
-  /* Ocultamos cualquier otra columna intermedia */
-  .table-wrapper th:not(:nth-child(1)):not(:nth-child(2)):not(:nth-child(3)):not(:last-child),
-  .table-wrapper td:not(:nth-child(1)):not(:nth-child(2)):not(:nth-child(3)):not(:last-child) {
-    display: none;
-  }
-
   /* El input de conteo ocupa toda su celda */
-  .table-wrapper td:last-child input {
+  .table-wrapper td.col-conteo input {
     width: 100%;
     font-size: 14px;
     padding: 6px;
@@ -587,18 +592,17 @@
       <div id="tabCajas" class="tab-panel active">
         <div class="table-wrapper">
           <table>
-            <thead>
-              <tr>
-                <th>Código</th>
-                <th>Descripción</th>
-                <th>U/M</th>
-                <th>Sistema</th>
-                <th>Físico (cajas)</th>
-                <th>Unid. sueltas</th>
-                <th>Diferencia</th>
-                <th>Estado</th>
-              </tr>
-            </thead>
+<thead>
+  <tr>
+    <th>Código</th>
+    <th>Descripción</th>
+    <th>U/M</th>
+    <th>Estado</th>
+    <th class="col-conteo">Conteo físico</th>  <!-- 👈 ESTE -->
+    <!-- si hay más columnas, las dejas igual -->
+  </tr>
+</thead>
+            
             <tbody id="tbodyCajas"></tbody>
           </table>
         </div>
@@ -1098,6 +1102,7 @@ inputCajas.addEventListener("input", (e) => {
   inventoryCajas[idx].fisicoCajas = val;
 });
 
+tdFisico.classList.add("col-conteo");
 tdFisico.appendChild(inputCajas);
 tr.appendChild(tdFisico);
 
