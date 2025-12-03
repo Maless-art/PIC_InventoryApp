@@ -1228,7 +1228,6 @@ function handleCountChange(index, tipo, inputEl, tdDiff, statusSpan) {
     valorAnterior === null ||
     typeof valorAnterior === "undefined";
 
-  // 🔒 Pedir clave solo en cambios reales posteriores
   if (!esPrimerConteo && nuevoValor !== valorAnterior) {
     const pass = prompt(
       "Para modificar un conteo existente, ingresa la clave de autorización:"
@@ -1259,13 +1258,6 @@ function handleCountChange(index, tipo, inputEl, tdDiff, statusSpan) {
   actualizarProgreso();
   guardarEstadoPIC();
 }
-}
-  // Actualizar modelo
-  if (tipo === "cajas") {
-    item.fisicoCajas = nuevoValor === "" ? null : nuevoValor;
-  } else {
-    item.fisicoUnidades = nuevoValor === "" ? null : nuevoValor;
-  }
 
   // Recalcular diferencia SIEMPRE
   const diff = calculateDiff(item.sistema, item.fisicoCajas);
