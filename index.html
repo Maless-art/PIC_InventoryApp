@@ -1213,25 +1213,27 @@ tr.appendChild(tdFisico);
 let bloqueandoCambio = false;
 
 function handleCountChange(index, tipo, inputEl, tdDiff, statusSpan) {
-  if (bloqueandoCambio) return;
-  bloqueandoCambio = true;
+  const item = inventoryCajas[index];
 
-  try {
-    const item = inventoryCajas[index];
+  // Inicializar control interno si no existe
+  if (!item._ultimaValidacion) item._ultimaValidacion = {};
 
-    const valorAnterior =
-      tipo === "cajas"
-        ? (item.fisicoCajas ?? "")
-        : (item.fisicoUnidades ?? "");
+  const valorAnterior =
+    tipo === "cajas"
+      ? (item.fisicoCajas ?? "")
+      : (item.fisicoUnidades ?? "");
 
-    const nuevoValor = inputEl.value === "" ? "" : Number(inputEl.value);
+  const nuevoValor = inputEl.value === "" ? "" : Number(inputEl.value);
 
-    const esPrimerConteo =
-      valorAnterior === "" ||
-      valorAnterior === null ||
-      typeof valorAnterior === "undefined";
+  const esPrimerConteo =
+    valorAnterior === "" ||
+    valorAnterior === null ||
+    typeof valorAnterior === "undefined";
 
-    if (!esPrimerConteo && nuevoValor !== valorAnterior) {
+  
+  if (!esPrimerConteo && nuevoValor !== valorAnterior) {
+   
+    if (item._ultimaValidacion[tipo] !== nuevoValor) {
       const pass = prompt(
         "Para modificar un conteo existente, ingresa la clave de autorización:"
       );
@@ -1240,27 +1242,31 @@ function handleCountChange(index, tipo, inputEl, tdDiff, statusSpan) {
         inputEl.value = valorAnterior === "" ? "" : valorAnterior;
         return;
       }
+
+      // Marcar este valor como ya validado
+      item._ultimaValidacion[tipo] = nuevoValor;
     }
-
-    if (tipo === "cajas") {
-      item.fisicoCajas = nuevoValor === "" ? null : nuevoValor;
-    } else {
-      item.fisicoUnidades = nuevoValor === "" ? null : nuevoValor;
-    }
-
-    const diff = calculateDiff(item.sistema, item.fisicoCajas);
-    tdDiff.textContent = formatDiff(diff);
-    tdDiff.className = "col-diff " + diffClass(diff);
-
-    applyStatusStyle(statusSpan, diff);
-
-    actualizarProgreso();
-    guardarEstadoPIC();
-  } finally {
-    setTimeout(() => {
-      bloqueandoCambio = false;
-    }, 400);
   }
+
+  // Actualizar modelo
+  if (tipo === "cajas") {
+    item.fisicoCajas = nuevoValor === "" ? null : nuevoValor;
+  } else {
+    item.fisicoUnidades = nuevoValor === "" ? null : nuevoValor;
+  }
+
+  
+  const diff = calculateDiff(item.sistema, item.fisicoCajas);
+  tdDiff.textContent = formatDiff(diff);
+  tdDiff.className = "col-diff " + diffClass(diff);
+
+  
+  applyStatusStyle(statusSpan, diff);
+
+  // Guardar cambios
+  actualizarProgreso();
+  guardarEstadoPIC();
+}
 
   // Actualizar modelo
   if (tipo === "cajas") {
