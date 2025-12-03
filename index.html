@@ -1289,19 +1289,37 @@ return;
       }
     }
 
-    // ---------- Botón Reiniciar ----------
-    btnReset.addEventListener("click", () => {
-      if (!inventoryCajas.length) {
-        alert("Primero carga un archivo de Sage.");
-        return;
-actualizarProgreso();
-      }
-      const ok = confirm(
-        "¿Seguro que deseas reiniciar TODOS los conteos físicos?\nEsta acción no se puede deshacer."
-      );
-      if (!ok) return;
-localStorage.removeItem("PIC_ESTADO");
+    // ----------- Botón Reiniciar -----------
+btnReset.addEventListener("click", () => {
+  if (!inventoryCajas.length) {
+    alert("Primero carga un archivo de Sage.");
+    return;
+  }
+
+  const ok = confirm(
+    "¿Seguro que deseas reiniciar TODOS los conteos físicos?\nEsta acción no se puede deshacer."
+  );
+  if (!ok) return;
+
+   localStorage.removeItem("PIC_ESTADO");
+
+  inventoryCajas.forEach((item) => {
+    item.fisicoCajas = null;
+    item.fisicoUnidades = null;
+    item.lockCajas = false;
+    item.lockUnidades = false;
+  });
+
+  sageRows.forEach((row) => {
+    if (H.colCuentaFisica) row[H.colCuentaFisica] = "";
+    if (H.colDiferencia) row[H.colDiferencia] = "";
+  });
+
+  renderTableCajas();
+  renderTableSueltas();
+  actualizarProgreso();
 });
+
 
       inventoryCajas.forEach((item) => {
         item.fisicoCajas = null;
