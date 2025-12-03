@@ -1144,6 +1144,22 @@ tr.appendChild(tdFisico);
 
         tbodyCajas.appendChild(tr);
       });
+
+document.addEventListener("focusin", function (e) {
+  if (!e.target.classList.contains("input-count")) return;
+
+  if (sessionStorage.getItem("pic-auth-ok") === "1") return;
+
+  const pass = prompt("Ingrese la contraseña para editar el conteo:");
+
+  if (pass !== "2025") {  
+    e.target.blur();
+    return;
+  }
+
+  sessionStorage.setItem("pic-auth-ok", "1");
+});
+
     }
 
     function renderTableSueltas() {
