@@ -1139,13 +1139,14 @@ tr.appendChild(tdFisico);
         tdStatus.appendChild(statusSpan);
         tr.appendChild(tdStatus);
 
-        inputCajas.addEventListener("blur", (e) => {
-  handleCountChange(index, "cajas", e.target, tdDiff, statusSpan);
-});
+      inputCajas.onblur = () => {
+  handleCountChange(index, "cajas", inputCajas, tdDiff, statusSpan);
+};
 
-inputUnid.addEventListener("blur", (e) => {
-  handleCountChange(index, "unidades", e.target, tdDiff, statusSpan);
-});
+inputUnid.onblur = () => {
+  handleCountChange(index, "unidades", inputUnid, tdDiff, statusSpan);
+};
+
 
         tbodyCajas.appendChild(tr);
       });
