@@ -1300,6 +1300,8 @@ actualizarProgreso();
         "¿Seguro que deseas reiniciar TODOS los conteos físicos?\nEsta acción no se puede deshacer."
       );
       if (!ok) return;
+localStorage.removeItem("PIC_ESTADO");
+});
 
       inventoryCajas.forEach((item) => {
         item.fisicoCajas = null;
@@ -1431,6 +1433,60 @@ document.addEventListener("change", function (e) {
         console.error("Error registrando el service worker", err);
       });
   }
+function guardarEstadoPIC() {
+  const estado = {
+    cajas: document.getElementById("tbodyCajas")?.innerHTML || "",
+    sueltas: document.getElementById("tbodySueltas")?.innerHTML || "",
+    responsable: document.getElementById("inputResponsable")?.value || "",
+    fechaDesde: document.getElementById("fechaDesde")?.value || "",
+    fechaHasta: document.getElementById("fechaHasta")?.value || "",
+    marca: document.getElementById("selectMarca")?.value || "",
+    especialidad: document.getElementById("selectEspecialidad")?.value || ""
+  };
+
+  localStorage.setItem("PIC_ESTADO", JSON.stringify(estado));
+}
+
+function cargarEstadoPIC() {
+  const data = localStorage.getItem("PIC_ESTADO");
+  if (!data) return;
+
+  const estado = JSON.parse(data);
+
+  if (document.getElementById("tbodyCajas")) {
+    document.getElementById("tbodyCajas").innerHTML = estado.cajas || "";
+  }
+
+  if (document.getElementById("tbodySueltas")) {
+    document.getElementById("tbodySueltas").innerHTML = estado.sueltas || "";
+  }
+
+  if (document.getElementById("inputResponsable"))
+    document.getElementById("inputResponsable").value = estado.responsable || "";
+
+  if (document.getElementById("fechaDesde"))
+    document.getElementById("fechaDesde").value = estado.fechaDesde || "";
+
+  if (document.getElementById("fechaHasta"))
+    document.getElementById("fechaHasta").value = estado.fechaHasta || "";
+
+  if (document.getElementById("selectMarca"))
+    document.getElementById("selectMarca").value = estado.marca || "";
+
+  if (document.getElementById("selectEspecialidad"))
+    document.getElementById("selectEspecialidad").value = estado.especialidad || "";
+}
+
+document.addEventListener("input", function (e) {
+  if (e.target.classList.contains("input-count")) {
+    guardarEstadoPIC();
+  }
+});
+
+window.addEventListener("load", function () {
+  cargarEstadoPIC();
+});
+
 </script>
 
 </body>
