@@ -426,6 +426,7 @@
 }
 
 /* Versión CELULAR: sin scroll horizontal y solo columnas clave */
+/* Versión CELULAR: sin scroll horizontal y columnas clave */
 @media (max-width: 768px) {
   .table-wrapper {
     max-height: 60vh;
@@ -448,20 +449,23 @@
   /* Dejamos visibles:
      1 = Código
      2 = Descripción
-     última = columna donde va el conteo físico
+     3 = Estado
+     última = (ahí debe ir el CONTEO FÍSICO)
   */
   .table-wrapper th:nth-child(1),
   .table-wrapper td:nth-child(1),
   .table-wrapper th:nth-child(2),
   .table-wrapper td:nth-child(2),
+  .table-wrapper th:nth-child(3),
+  .table-wrapper td:nth-child(3),
   .table-wrapper th:last-child,
   .table-wrapper td:last-child {
     display: table-cell;
   }
 
-  /* Ocultamos las demás columnas en móvil */
-  .table-wrapper th:not(:nth-child(1)):not(:nth-child(2)):not(:last-child),
-  .table-wrapper td:not(:nth-child(1)):not(:nth-child(2)):not(:last-child) {
+  /* Ocultamos cualquier otra columna intermedia */
+  .table-wrapper th:not(:nth-child(1)):not(:nth-child(2)):not(:nth-child(3)):not(:last-child),
+  .table-wrapper td:not(:nth-child(1)):not(:nth-child(2)):not(:nth-child(3)):not(:last-child) {
     display: none;
   }
 
