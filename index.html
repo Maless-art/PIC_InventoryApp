@@ -406,13 +406,12 @@
         font-size: 0.75rem;
       }
     }
-/* Scroll vertical de la tabla */
+/* Tabla PIC: comportamiento general en escritorio */
 .table-wrapper {
   max-height: 480px;
   overflow-y: auto;
 }
 
-/* Asegurar ancho completo */
 .table-wrapper table {
   width: 100%;
   border-collapse: collapse;
@@ -424,6 +423,54 @@
   top: 0;
   z-index: 3;
   background: #0b1120;
+}
+
+/* Versión CELULAR: sin scroll horizontal y solo columnas clave */
+@media (max-width: 768px) {
+  .table-wrapper {
+    max-height: 60vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .table-wrapper table {
+    width: 100%;
+    table-layout: fixed;
+  }
+
+  .table-wrapper th,
+  .table-wrapper td {
+    font-size: 11px;
+    padding: 6px 4px;
+    word-break: break-word;
+  }
+
+  /* Dejamos visibles:
+     1 = Código
+     2 = Descripción
+     última = columna donde va el conteo físico
+  */
+  .table-wrapper th:nth-child(1),
+  .table-wrapper td:nth-child(1),
+  .table-wrapper th:nth-child(2),
+  .table-wrapper td:nth-child(2),
+  .table-wrapper th:last-child,
+  .table-wrapper td:last-child {
+    display: table-cell;
+  }
+
+  /* Ocultamos las demás columnas en móvil */
+  .table-wrapper th:not(:nth-child(1)):not(:nth-child(2)):not(:last-child),
+  .table-wrapper td:not(:nth-child(1)):not(:nth-child(2)):not(:last-child) {
+    display: none;
+  }
+
+  /* El input de conteo ocupa toda su celda */
+  .table-wrapper td:last-child input {
+    width: 100%;
+    font-size: 14px;
+    padding: 6px;
+  }
 }
 
   </style>
