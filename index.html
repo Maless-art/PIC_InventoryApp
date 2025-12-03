@@ -1107,12 +1107,6 @@ inputCajas.className = "input-count";
 inputCajas.value = item.fisicoCajas != null ? item.fisicoCajas : "";
 inputCajas.dataset.index = index.toString();
 
-inputCajas.addEventListener("input", (e) => {
-  const idx = Number(e.target.dataset.index);
-  const val = e.target.value === "" ? "" : Number(e.target.value);
-  inventoryCajas[idx].fisicoCajas = val;
-});
-
 tdFisico.classList.add("col-conteo");
 tdFisico.appendChild(inputCajas);
 tr.appendChild(tdFisico);
@@ -1216,59 +1210,52 @@ tr.appendChild(tdFisico);
     }
 
     // ---------- Manejo de cambios con PIN ----------
-    function handleCountChange(index, field, inputEl, tdDiff, statusSpan) {
-      const item = inventoryCajas[index];
-      const raw = inputEl.value;
-      const nuevo = raw === "" ? null : Number(raw);
+    function handleCountChange(index, tipo, inputEl, tdDiff, statusSpan) {
+  const item = inventoryCajas[index];
 
-      const isCajas = field === "cajas";
-      const lockFlag = isCajas ? "lockCajas" : "lockUnidades";
-      const prev = isCajas ? item.fisicoCajas : item.fisicoUnidades;
+  const valorAnterior =
+    tipo === "cajas"
+      ? (item.fisicoCajas ?? "")
+      : (item.fisicoUnidades ?? "");
 
-      // Primera vez: sin PIN
-      if (!item[lockFlag]) {
-        if (isCajas) {
-          item.fisicoCajas = nuevo;
-          syncWithSage(item);
-          const diff = calculateDiff(item.sistema, item.fisicoCajas);
-          tdDiff.textContent = formatDiff(diff);
-          tdDiff.className = "col-diff " + diffClass(diff);
-          applyStatusStyle(statusSpan, diff);
-        } else {
-          item.fisicoUnidades = nuevo;
-        }
-        item[lockFlag] = true;
-renderTableSueltas();
-actualizarProgreso();   
-return;
+  const nuevoValor = inputEl.value === "" ? "" : Number(inputEl.value);
 
-      }
+  const esPrimerConteo =
+    valorAnterior === "" ||
+    valorAnterior === null ||
+    typeof valorAnterior === "undefined";
 
-      // No cambió el valor
-      if (nuevo === prev) return;
+  // Si NO es primer conteo y el valor cambió → pedir clave
+  if (!esPrimerConteo && nuevoValor !== valorAnterior) {
+    const pass = prompt(
+      "Para modificar un conteo existente, ingresa la clave de autorización:"
+    );
 
-      // Segunda vez en adelante: pide PIN
-      const pin = prompt(
-        "Este conteo ya fue ingresado. Ingrese la clave de supervisor para modificarlo:"
-      );
-      if (pin === SUPERVISOR_PIN) {
-        if (isCajas) {
-          item.fisicoCajas = nuevo;
-          syncWithSage(item);
-          const diff = calculateDiff(item.sistema, item.fisicoCajas);
-          tdDiff.textContent = formatDiff(diff);
-          tdDiff.className = "col-diff " + diffClass(diff);
-          applyStatusStyle(statusSpan, diff);
-        } else {
-          item.fisicoUnidades = nuevo;
-        }
-        renderTableSueltas();
-      } else {
-        alert("Clave incorrecta. El valor no fue modificado.");
-        inputEl.value = prev ?? "";
-      }
-	actualizarProgreso();
+    if (pass !== "2025") {
+      inputEl.value = valorAnterior === "" ? "" : valorAnterior;
+      return;
     }
+  }
+
+  // Actualizar modelo
+  if (tipo === "cajas") {
+    item.fisicoCajas = nuevoValor === "" ? null : nuevoValor;
+  } else {
+    item.fisicoUnidades = nuevoValor === "" ? null : nuevoValor;
+  }
+
+  // Recalcular diferencia SIEMPRE
+  const diff = calculateDiff(item.sistema, item.fisicoCajas);
+  tdDiff.textContent = formatDiff(diff);
+  tdDiff.className = "col-diff " + diffClass(diff);
+
+  // Actualizar estado
+  applyStatusStyle(statusSpan, diff);
+
+  // Guardar cambios y refrescar progreso
+  actualizarProgreso();
+  guardarEstadoPIC();
+}
 
     // ---------- Sincronizar con filas originales ----------
     function syncWithSage(item) {
