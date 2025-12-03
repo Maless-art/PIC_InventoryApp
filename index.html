@@ -1139,12 +1139,13 @@ tr.appendChild(tdFisico);
         tdStatus.appendChild(statusSpan);
         tr.appendChild(tdStatus);
 
-        inputCajas.addEventListener("change", (e) => {
-          handleCountChange(index, "cajas", e.target, tdDiff, statusSpan);
-        });
-        inputUnid.addEventListener("change", (e) => {
-          handleCountChange(index, "unidades", e.target, tdDiff, statusSpan);
-        });
+        inputCajas.addEventListener("blur", (e) => {
+  handleCountChange(index, "cajas", e.target, tdDiff, statusSpan);
+});
+
+inputUnid.addEventListener("blur", (e) => {
+  handleCountChange(index, "unidades", e.target, tdDiff, statusSpan);
+});
 
         tbodyCajas.appendChild(tr);
       });
@@ -1215,9 +1216,6 @@ let bloqueandoCambio = false;
 function handleCountChange(index, tipo, inputEl, tdDiff, statusSpan) {
   const item = inventoryCajas[index];
 
-  // Inicializar control interno si no existe
-  if (!item._ultimaValidacion) item._ultimaValidacion = {};
-
   const valorAnterior =
     tipo === "cajas"
       ? (item.fisicoCajas ?? "")
@@ -1230,22 +1228,17 @@ function handleCountChange(index, tipo, inputEl, tdDiff, statusSpan) {
     valorAnterior === null ||
     typeof valorAnterior === "undefined";
 
-  
+  // 🔒 Pedir clave solo en cambios reales posteriores
   if (!esPrimerConteo && nuevoValor !== valorAnterior) {
-   
-    if (item._ultimaValidacion[tipo] !== nuevoValor) {
-      const pass = prompt(
-        "Para modificar un conteo existente, ingresa la clave de autorización:"
-      );
+    const pass = prompt(
+      "Para modificar un conteo existente, ingresa la clave de autorización:"
+    );
 
-      if (pass !== "2025") {
-        inputEl.value = valorAnterior === "" ? "" : valorAnterior;
-        return;
-      }
-
-      // Marcar este valor como ya validado
-      item._ultimaValidacion[tipo] = nuevoValor;
+    if (pass !== "2025") {
+      inputEl.value = valorAnterior === "" ? "" : valorAnterior;
+      return;
     }
+  }
 
   // Actualizar modelo
   if (tipo === "cajas") {
@@ -1254,15 +1247,15 @@ function handleCountChange(index, tipo, inputEl, tdDiff, statusSpan) {
     item.fisicoUnidades = nuevoValor === "" ? null : nuevoValor;
   }
 
-  
+  // Recalcular diferencia
   const diff = calculateDiff(item.sistema, item.fisicoCajas);
   tdDiff.textContent = formatDiff(diff);
   tdDiff.className = "col-diff " + diffClass(diff);
 
-  
+  // Estado visual
   applyStatusStyle(statusSpan, diff);
 
-  // Guardar cambios
+  // Guardar
   actualizarProgreso();
   guardarEstadoPIC();
 }
