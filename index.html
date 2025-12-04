@@ -490,6 +490,18 @@ min-width: 100%;
     font-size: 14px;
     padding: 6px;
   }
+.fila-total {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  font-weight: 600;
+}
+
+.total-ganancia {
+  color: #32d296;
+}
+
+.total-perdida {
+  color: #ff6b6b;
+}
 
   </style>
 </head>
@@ -595,6 +607,9 @@ min-width: 100%;
         <button class="tab-btn" data-tab="tabSueltas">
           Unidades sueltas
         </button>
+  <button class="tab-btn" data-tab="tabResumen">
+    Resumen ejecutivo
+  </button>
       </div>
 
       <!-- Paneles -->
@@ -620,30 +635,43 @@ min-width: 100%;
       </div>
 
       <div id="tabSueltas" class="tab-panel">
-        <div class="filters-row" style="margin-top: 0.25rem;">
-          <input
-            type="text"
-            id="searchSueltas"
-            class="search-input"
-            placeholder="Buscar por código o descripción (sueltas)"
-          />
-        </div>
-        <div class="table-wrapper">
-          <table>
-            <thead>
-              <tr>
-                <th>Código</th>
-                <th>Descripción</th>
-                <th>Unid. sueltas</th>
-                <th>Estado</th>
-              </tr>
-            </thead>
-            <tbody id="tbodySueltas"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
+  <div class="filters-row" style="margin-top: 0.25rem;">
+    <input
+      type="text"
+      id="searchSueltas"
+      class="search-input"
+      placeholder="Buscar por código o descripción (sueltas)"
+    />
   </div>
+
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Descripción</th>
+          <th>Unid. sueltas</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody id="tbodySueltas"></tbody>
+    </table>
+  </div>
+</div>
+
+<div id="tabResumen" class="tab-panel">
+  <section id="resumenEjecutivo"></section>
+
+  <div style="margin-top: 1rem; text-align: right;">
+    <button
+      id="btnExportResumen"
+      class="btn-primary"
+      type="button"
+    >
+      Exportar resumen a Excel
+    </button>
+  </div>
+</div>
 
   <!-- Librería Excel -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -734,6 +762,7 @@ min-width: 100%;
     const btnLoadExcel = document.getElementById("btnLoadExcel");
     const btnReset = document.getElementById("btnReset");
     const btnExportExcel = document.getElementById("btnExportExcel");
+    const btnExportResumen = document.getElementById("btnExportResumen");
     const excelInput = document.getElementById("excelInput");
     const tbodyCajas = document.getElementById("tbodyCajas");
     const tbodySueltas = document.getElementById("tbodySueltas");
@@ -852,6 +881,8 @@ min-width: 100%;
 
         const headerRowIndex = findHeaderRowIndex(aoa);
         sageHeaders = aoa[headerRowIndex].map((c) => String(c));
+H.colCosto = sageHeaders.find(h => String(h).trim() === "Last Unit Cost");
+
         sageRows = [];
         sageIndexByCodigo.clear();
 
@@ -874,49 +905,33 @@ min-width: 100%;
           sageRows.push(obj);
         }
 
-        // Mapear a inventario interno
+
 inventoryCajas = sageRows.map((row, index) => {
-  const codigo      = H.colCodigo      ? row[H.colCodigo]      : "";
-  const descripcion = H.colDescripcion ? row[H.colDescripcion] : "";
+  const codigo      = H.colCodigo      ? row[H.colCodigo]         : "";
+  const descripcion = H.colDescripcion ? row[H.colDescripcion]    : "";
   const unidad      = H.colUnidad      ? String(row[H.colUnidad]) : "";
-  const marca       = H.colMarca       ? row[H.colMarca]       : "";
+  const marca       = H.colMarca       ? row[H.colMarca]          : "";
+  const sistema     = H.colSistema     ? Number(row[H.colSistema]) || 0 : 0;
 
-  
-  let sistema = "";
-  if (H.colSistema) {
-    const rawSis = row[H.colSistema];
-
-    if (rawSis !== undefined && rawSis !== null && String(rawSis).trim() !== "") {
-      const n = Number(rawSis);
-     
-      sistema = Number.isFinite(n) ? n : "";
-    } else {
-      sistema = ""; // acá respetas que el Excel viene en blanco
-    }
-  }
-
-  
-  let costo = 0;
-  if (H.colCosto) {
-    const rawCosto = row[H.colCosto];
-    const n = Number(rawCosto);
-    costo = Number.isFinite(n) ? n : 0;
-  }
-
-  let especialidad = "Varios";
-  if (H.colEspecialidad && row[H.colEspecialidad] !== undefined) {
-    const rawEsp = String(row[H.colEspecialidad] || "").trim();
-    if (rawEsp !== "") especialidad = rawEsp;
-  }
+ 
+  const costo       = H.colCosto       ? Number(row[H.colCosto]) || 0 : 0;
 
   return {
     codigo,
     descripcion,
-    unidad,      // U/M
-    sistema,     // Qty on Hand EXACTO del Excel
+    unidad,
     marca,
-    costo,
-    especialidad,
+    sistema,
+
+    fisicoCajas: null,
+    fisicoUnidades: null,
+    lockCajas: false,
+    lockUnidades: false,
+
+    costo,         
+    diff: 0,
+    estado: "PENDIENTE",
+    index,
   };
 });
 
@@ -964,6 +979,8 @@ function actualizarProgreso() {
 
   contadorProgresoEl.textContent =
     contados + " de " + total + " productos contados";
+  renderResumenEjecutivo();
+
 }
 
 
@@ -1211,25 +1228,21 @@ inputUnid.onblur = () => {
       });
     }
 
-    // ---------- Manejo de cambios con PIN ----------
-
-
-// ----------- Manejo de cambios (SIN PIN, versión estable) -----------
 function handleCountChange(index, tipo, inputEl, tdDiff, statusSpan) {
   const item = inventoryCajas[index];
 
-  // Valor nuevo que el usuario dejó
+ 
   const nuevoValor =
     inputEl.value === "" ? null : Number(inputEl.value);
 
-  // Guardar en modelo
+  
   if (tipo === "cajas") {
     item.fisicoCajas = nuevoValor;
   } else {
     item.fisicoUnidades = nuevoValor;
   }
 
-  // Recalcular diferencia con las CAJAS
+
   const diff = calculateDiff(item.sistema, item.fisicoCajas);
   tdDiff.textContent = formatDiff(diff);
   tdDiff.className = "col-diff " + diffClass(diff);
@@ -1243,7 +1256,7 @@ function handleCountChange(index, tipo, inputEl, tdDiff, statusSpan) {
 }
 
 
-    // ---------- Sincronizar con filas originales ----------
+   
     function syncWithSage(item) {
       const idx = sageIndexByCodigo.get(item.codigo);
       if (idx === undefined) return;
@@ -1262,7 +1275,7 @@ function handleCountChange(index, tipo, inputEl, tdDiff, statusSpan) {
       }
     }
 
-    // ----------- Botón Reiniciar -----------
+  
 btnReset.addEventListener("click", () => {
   if (!inventoryCajas.length) {
     alert("Primero carga un archivo de Sage.");
@@ -1494,8 +1507,153 @@ document.addEventListener("input", function (e) {
 window.addEventListener("load", function () {
   cargarEstadoPIC();
 });
+// --------- Estado según diferencia ---------
+function getEstadoFromDiff(diff) {
+  if (diff === 0) return "OK";
+  if (Math.abs(diff) <= 2) return "REVISAR";
+  return "ALERTA";
+}
+
+// --------- Cálculo del resumen ---------
+function calcularResumenEjecutivo() {
+  const resumen = {
+    OK:      { items: 0, diff: 0, valor: 0 },
+    REVISAR: { items: 0, diff: 0, valor: 0 },
+    ALERTA:  { items: 0, diff: 0, valor: 0 },
+  };
+
+  inventoryCajas.forEach((item) => {
+    if (!item) return;
+
+    if (item.fisicoCajas === null || item.fisicoCajas === "" || isNaN(item.fisicoCajas)) {
+      return;
+    }
+
+    const diff = calculateDiff(item.sistema, item.fisicoCajas);
+    const estado = getEstadoFromDiff(diff);
+    const grupo = resumen[estado];
+    if (!grupo) return;
+
+    const costo = item.costo || 0;
+
+    grupo.items += 1;
+    grupo.diff  += diff;
+    grupo.valor += -diff * costo;
+
+  });
+
+  return resumen;
+}
+
+// ---------- Pintar resumen en pantalla ----------
+function renderResumenEjecutivo() {
+  const cont = document.getElementById("resumenEjecutivo");
+  if (!cont) return;
+
+  const resumen = calcularResumenEjecutivo();
+
+  let html = `
+    <h3>Resumen ejecutivo</h3>
+    <table class="tabla-resumen">
+      <thead>
+        <tr>
+          <th>Estado</th>
+          <th>Productos</th>
+          <th>Diferencia total</th>
+          <th>Impacto ($)</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
+
+  const estados = ["OK", "REVISAR", "ALERTA"];
+  let totalImpacto = 0;
+
+  estados.forEach((estado) => {
+    const grupo = resumen[estado];
+    if (!grupo) return;
+
+    totalImpacto += grupo.valor;
+
+    html += `
+      <tr>
+        <td>${estado}</td>
+        <td>${grupo.items}</td>
+        <td>${grupo.diff}</td>
+        <td>${grupo.valor.toFixed(2)}</td>
+      </tr>
+    `;
+  });
+// ---------- Exportar resumen ejecutivo a Excel ----------
+function exportResumenEjecutivoExcel() {
+  try {
+    // Para comprobar que el botón sí dispara
+    alert("Generando archivo de resumen...");
+
+    const cont = document.getElementById("resumenEjecutivo");
+    if (!cont) {
+      alert("No hay contenedor de resumen ejecutivo.");
+      return;
+    }
+
+    const tabla = cont.querySelector("table");
+    if (!tabla) {
+      alert("El resumen está vacío (no hay tabla para exportar).");
+      return;
+    }
+
+    const filas = tabla.querySelectorAll("tbody tr");
+    if (!filas.length) {
+      alert("El resumen está vacío (no hay filas en la tabla).");
+      return;
+    }
+
+    const aoa = [];
+    aoa.push(["Estado", "Ítems", "Diferencia total", "Impacto ($)"]);
+
+    filas.forEach((tr) => {
+      const celdas = Array.from(tr.querySelectorAll("td")).map((td) =>
+        td.textContent.trim()
+      );
+      if (!celdas.length) return;
+      aoa.push(celdas);
+    });
+
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Resumen ejecutivo");
+
+    XLSX.writeFile(wb, "PIC_Resumen_Ejecutivo.xlsx");
+  } catch (err) {
+    console.error(err);
+    alert("Error exportando el resumen: " + err.message);
+  }
+}
+
+  // --- Fila TOTAL ---
+  const totalClass =
+    totalImpacto > 0 ? "total-ganancia" :
+    totalImpacto < 0 ? "total-perdida" :
+    "";
+
+  html += `
+      <tr class="fila-total">
+        <td>Total ganancia / pérdida</td>
+        <td></td>
+        <td></td>
+        <td class="${totalClass}">${totalImpacto.toFixed(2)}</td>
+      </tr>
+      </tbody>
+    </table>
+  `;
+
+  cont.innerHTML = html;
+}
+
+btnExportResumen.addEventListener("click", () => {
+  exportResumenEjecutivoExcel();
+});
 
 </script>
-
 </body>
 </html>
