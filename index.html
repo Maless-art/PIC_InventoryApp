@@ -58,8 +58,7 @@
     #splash-text {
       font-size: 1.1rem;
       color: var(--text-muted);
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
+      letter-spacing: 0.08em;      
     }
     #splash-progress {
       width: 230px;
@@ -510,7 +509,7 @@ min-width: 100%;
   <div id="splash">
     <!-- 🔁 Cambia el src por la ruta real de tu logo -->
     <img id="splash-logo" src="logo_pic.png" alt="Luquisa logo" />
-    <div id="splash-text">Cargando elementos<span id="dots">...</span></div>
+    <div id="splash-text">Preparando módulos<span id="dots">...</span></div>
     <div id="splash-progress"><div id="splash-bar"></div></div>
   </div>
 
@@ -758,22 +757,49 @@ min-width: 100%;
       );
     }
 
-    // ---------- Splash ----------
-    const splash = document.getElementById("splash");
-    const dotsSpan = document.getElementById("dots");
-    const app = document.getElementById("app");
+   // ---------- Splash con mensajes secuenciales ----------
+const splash = document.getElementById("splash");
+const splashText = document.getElementById("splash-text");
+const dotsSpan = document.getElementById("dots");
+const app = document.getElementById("app");
 
-    let dotCount = 1;
-    const dotsInterval = setInterval(() => {
-      dotCount = (dotCount % 3) + 1;
-      dotsSpan.textContent = ".".repeat(dotCount);
-    }, 500);
+// Animación de puntos "..."
+let dotCount = 1;
+const dotsInterval = setInterval(() => {
+  dotCount = (dotCount % 3) + 1;
+  dotsSpan.textContent = ".".repeat(dotCount);
+}, 500);
 
+// Mensajes secuenciales
+const mensajes = [
+  "Preparando módulos",
+  "Inicializando interfaz",
+  "Cargando elementos"
+];
+
+let paso = 0;
+
+function cambiarMensaje() {
+  splashText.childNodes[0].textContent = mensajes[paso];
+  paso++;
+
+  if (paso < mensajes.length) {
+    setTimeout(cambiarMensaje, 1500); // 1.5s por mensaje
+  } else {
+    // último mensaje → cerrar splash
     setTimeout(() => {
       clearInterval(dotsInterval);
-      splash.style.display = "none";
-      app.style.display = "block";
-    }, 3500);
+      splash.style.opacity = "0";
+      setTimeout(() => {
+        splash.style.display = "none";
+        app.style.display = "block";
+      }, 400);
+    }, 1500);
+  }
+}
+
+// iniciar secuencia
+setTimeout(cambiarMensaje, 300); 
 
     // ---------- Tabs ----------
     const tabButtons = document.querySelectorAll(".tab-btn");
