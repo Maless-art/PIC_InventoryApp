@@ -510,7 +510,7 @@ min-width: 100%;
   <div id="splash">
     <!-- 🔁 Cambia el src por la ruta real de tu logo -->
     <img id="splash-logo" src="logo_pic.png" alt="Luquisa logo" />
-    <div id="splash-text">Cargando PIC<span id="dots">...</span></div>
+    <div id="splash-text">Cargando elementos<span id="dots">...</span></div>
     <div id="splash-progress"><div id="splash-bar"></div></div>
   </div>
 
@@ -660,24 +660,58 @@ min-width: 100%;
 </div>
 
 <div id="tabResumen" class="tab-panel">
-  <section id="resumenEjecutivo"></section>
 
-  <div style="margin-top: 1rem; text-align: right;">
-    <button
-      id="btnExportResumen"
-      class="btn-primary"
-      type="button"
-    >
-      Exportar resumen a Excel
-    </button>
-  </div>
+    <h2>Resumen Ejecutivo</h2>
+
+    <div style="margin-bottom: 1rem;">
+        <input 
+            type="password" 
+            id="passResumen" 
+            placeholder="Contraseña Resumen Ejecutivo" 
+            style="padding: 6px; width: 220px;"
+        />
+        <button id="btnAccederResumen" class="btn-primary" type="button">
+            Acceder
+        </button>
+    </div>
+
+    <section id="resumenEjecutivo" style="display:none;"></section>
+
+    <div style="margin-top: 1rem; text-align: right;">
+        <button
+            id="btnExportResumen"
+            class="btn-primary"
+            type="button"
+        >
+            Exportar resumen a Excel
+        </button>
+    </div>
 </div>
 
   <!-- Librería Excel -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
+ 
   <script>
     // ---------- CONFIGURACIÓN SAGE ----------
+
+    const passwordResumen = "RM2025";
+
+    document
+      .getElementById("btnAccederResumen")
+      .addEventListener("click", () => {
+        const passIngresada = document
+          .getElementById("passResumen")
+          .value.trim();
+
+        if (passIngresada === passwordResumen) {
+          document.getElementById("resumenEjecutivo").style.display = "block";
+          alert("Acceso concedido al Resumen Ejecutivo.");
+        } else {
+          alert("Contraseña incorrecta.");
+        }
+      });
+
     const SAGE_CONFIG = {
       colCodigo: "Item ID",
       colDescripcion: "Description for Sales",
@@ -687,7 +721,7 @@ min-width: 100%;
       colCuentaFisica: "Cuenta Fisica",
       colDiferencia: "Diferencia",
       colCosto: "Last Unit Cost",
-      colEspecialidad: "Location"
+      colEspecialidad: "Location",
     };
 
     const SAGE_PATTERNS = {
@@ -699,7 +733,7 @@ min-width: 100%;
       colCuentaFisica: ["cuenta fisica", "conteo fisico", "physical count"],
       colDiferencia: ["diferencia", "difference", "variance"],
       colCosto: ["last unit cost", "unit cost", "ultimo costo"],
-      colEspecialidad: ["location", "locacion", "ubicacion"]
+      colEspecialidad: ["location", "locacion", "ubicacion"],
     };
 
     const SUPERVISOR_PIN = "2025"; // 🔁 Cambia la clave si deseas
@@ -707,25 +741,21 @@ min-width: 100%;
     // Estado global
     let H = {};
     let sageHeaders = [];
-    let sageRows = [];
-    let inventoryCajas = [];
-    let sageIndexByCodigo = new Map();
+    let sageRows = [];              // filas originales Sage (como objetos)
+    let inventoryCajas = [];        // lo que ves en la tabla
+    let sageIndexByCodigo = new Map(); // código -> índice en sageRows
 
     // ---------- Normalizador de encabezados ----------
     function normalizeHeader(h) {
-      return String(h || "")
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "") // quita tildes
-        .replace(/[\[\]\(\):]/g, " ")
-        .replace(/\s+/g, " ")
-        .trim()
-        .lowerCase?.() || String(h || "")
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/[\[\]\(\):]/g, " ")
-        .replace(/\s+/g, " ")
-        .trim()
-        .toLowerCase();
+      return (
+        String(h || "")
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "") // quita tildes
+          .replace(/[\[\]\(\):]/g, " ")
+          .replace(/\s+/g, " ")
+          .trim()
+          .toLowerCase() || String(h || "")
+      );
     }
 
     // ---------- Splash ----------
@@ -836,7 +866,7 @@ min-width: 100%;
         "colDescripcion",
         "colUnidad",
         "colMarca",
-        "colSistema"
+        "colSistema",
       ];
       const missingCritical = [];
       criticalKeys.forEach((key) => {
@@ -872,7 +902,7 @@ min-width: 100%;
 
         const aoa = XLSX.utils.sheet_to_json(sheet, {
           header: 1,
-          defval: ""
+          defval: "",
         });
         if (!aoa.length) {
           alert("El archivo está vacío.");
@@ -881,7 +911,9 @@ min-width: 100%;
 
         const headerRowIndex = findHeaderRowIndex(aoa);
         sageHeaders = aoa[headerRowIndex].map((c) => String(c));
-H.colCosto = sageHeaders.find(h => String(h).trim() === "Last Unit Cost");
+        H.colCosto = sageHeaders.find(
+          (h) => String(h).trim() === "Last Unit Cost"
+        );
 
         sageRows = [];
         sageIndexByCodigo.clear();
@@ -895,6 +927,7 @@ H.colCosto = sageHeaders.find(h => String(h).trim() === "Last Unit Cost");
 
         resolveSageColumns();
 
+        // Construimos sageRows como OBJETOS con todas las columnas
         for (let i = headerRowIndex + 1; i < aoa.length; i++) {
           const rowArr = aoa[i];
           if (rowArr.every((cell) => String(cell).trim() === "")) continue;
@@ -902,19 +935,68 @@ H.colCosto = sageHeaders.find(h => String(h).trim() === "Last Unit Cost");
           sageHeaders.forEach((h, idx) => {
             obj[h] = rowArr[idx];
           });
+          const idx = sageRows.length;
           sageRows.push(obj);
+
+          // Llenar mapa código -> índice
+          if (H.colCodigo) {
+            const codigo = obj[H.colCodigo];
+            if (codigo !== undefined && codigo !== null && codigo !== "") {
+              sageIndexByCodigo.set(String(codigo), idx);
+            }
+          }
         }
 
+        // Construimos inventoryCajas con datos relevantes
+        // 1) Guardar conteos anteriores si ya existían
+const prevByCode = new Map();
 
+if (Array.isArray(inventoryCajas)) {
+  inventoryCajas.forEach((it) => {
+    if (it && it.codigo) {
+      prevByCode.set(String(it.codigo), it);
+    }
+  });
+}
+
+// 2) Construir nueva lista PERO preservando conteos previos
 inventoryCajas = sageRows.map((row, index) => {
-  const codigo      = H.colCodigo      ? row[H.colCodigo]         : "";
-  const descripcion = H.colDescripcion ? row[H.colDescripcion]    : "";
-  const unidad      = H.colUnidad      ? String(row[H.colUnidad]) : "";
-  const marca       = H.colMarca       ? row[H.colMarca]          : "";
-  const sistema     = H.colSistema     ? Number(row[H.colSistema]) || 0 : 0;
+  const codigo =
+    H.colCodigo && row[H.colCodigo] != null ? String(row[H.colCodigo]) : "";
 
- 
-  const costo       = H.colCosto       ? Number(row[H.colCosto]) || 0 : 0;
+  const descripcion =
+    H.colDescripcion && row[H.colDescripcion] != null
+      ? String(row[H.colDescripcion])
+      : "";
+
+  const unidad =
+    H.colUnidad && row[H.colUnidad] != null
+      ? String(row[H.colUnidad])
+      : "";
+
+  const marca =
+    H.colMarca && row[H.colMarca] != null ? String(row[H.colMarca]) : "";
+
+  const sistema =
+    H.colSistema && row[H.colSistema] != null
+      ? Number(row[H.colSistema]) || 0
+      : 0;
+
+  const costo =
+    H.colCosto && row[H.colCosto] != null
+      ? Number(row[H.colCosto]) || 0
+      : 0;
+
+  // Valores por defecto
+  let fisicoCajas = null;
+  let fisicoUnidades = null;
+
+  // Si ya había datos guardados para este código → se preservan
+  const prev = prevByCode.get(codigo);
+  if (prev) {
+    fisicoCajas = prev.fisicoCajas ?? null;
+    fisicoUnidades = prev.fisicoUnidades ?? null;
+  }
 
   return {
     codigo,
@@ -922,26 +1004,22 @@ inventoryCajas = sageRows.map((row, index) => {
     unidad,
     marca,
     sistema,
-
-    fisicoCajas: null,
-    fisicoUnidades: null,
+    fisicoCajas,
+    fisicoUnidades,
     lockCajas: false,
     lockUnidades: false,
-
-    costo,         
+    costo,
     diff: 0,
     estado: "PENDIENTE",
     index,
   };
 });
 
-renderTableCajas();
-renderTableSueltas();
-actualizarProgreso();  
 
-        populateFilters();
         renderTableCajas();
         renderTableSueltas();
+        actualizarProgreso();
+        populateFilters();
 
         alert(
           "Se cargaron " +
@@ -952,37 +1030,41 @@ actualizarProgreso();
 
       reader.readAsArrayBuffer(file);
     });
-function actualizarProgreso() {
-  const tbody = document.getElementById("tbodyCajas");
-  const contadorProgresoEl = document.getElementById("contadorProgreso");
 
-  if (!tbody || !contadorProgresoEl) return;
+    function actualizarProgreso() {
+      const tbody = document.getElementById("tbodyCajas");
+      const contadorProgresoEl =
+        document.getElementById("contadorProgreso");
 
-  const filas = tbody.querySelectorAll("tr");
-  const total = filas.length;
-  let contados = 0;
+      if (!tbody || !contadorProgresoEl) return;
 
-  filas.forEach((tr) => {
-    const inputs = tr.querySelectorAll("input");
-    let tieneValor = false;
+      const filas = tbody.querySelectorAll("tr");
+      const total = filas.length;
+      let contados = 0;
 
-    inputs.forEach((inp) => {
-      if (inp.value !== "" && inp.value !== null && inp.value !== undefined) {
-        tieneValor = true;
-      }
-    });
+      filas.forEach((tr) => {
+        const inputs = tr.querySelectorAll("input");
+        let tieneValor = false;
 
-    if (tieneValor) {
-      contados++;
+        inputs.forEach((inp) => {
+          if (
+            inp.value !== "" &&
+            inp.value !== null &&
+            inp.value !== undefined
+          ) {
+            tieneValor = true;
+          }
+        });
+
+        if (tieneValor) {
+          contados++;
+        }
+      });
+
+      contadorProgresoEl.textContent =
+        contados + " de " + total + " productos contados";
+      renderResumenEjecutivo();
     }
-  });
-
-  contadorProgresoEl.textContent =
-    contados + " de " + total + " productos contados";
-  renderResumenEjecutivo();
-
-}
-
 
     // ---------- Filtros ----------
     function populateFilters() {
@@ -1096,37 +1178,35 @@ function actualizarProgreso() {
         tr.appendChild(tdUM);
 
         const tdSistema = document.createElement("td");
-tdSistema.className = "col-num";
+        tdSistema.className = "col-num";
 
-if (
-  item.sistema === "" ||
-  item.sistema === null ||
-  item.sistema === undefined ||
-  Number.isNaN(item.sistema)
-) {
-  tdSistema.textContent = "";
-} else {
-  tdSistema.textContent = item.sistema;
-}
+        if (
+          item.sistema === "" ||
+          item.sistema === null ||
+          item.sistema === undefined ||
+          Number.isNaN(item.sistema)
+        ) {
+          tdSistema.textContent = "";
+        } else {
+          tdSistema.textContent = item.sistema;
+        }
 
-tr.appendChild(tdSistema);
-
-
+        tr.appendChild(tdSistema);
 
         const tdFisico = document.createElement("td");
-tdFisico.className = "col-input";
+        tdFisico.className = "col-input col-conteo";
 
-const inputCajas = document.createElement("input");
-inputCajas.type = "number";
-inputCajas.min = "0";
-inputCajas.step = "1";
-inputCajas.className = "input-count";
-inputCajas.value = item.fisicoCajas != null ? item.fisicoCajas : "";
-inputCajas.dataset.index = index.toString();
+        const inputCajas = document.createElement("input");
+        inputCajas.type = "number";
+        inputCajas.min = "0";
+        inputCajas.step = "1";
+        inputCajas.className = "input-count";
+        inputCajas.value =
+          item.fisicoCajas != null ? item.fisicoCajas : "";
+        inputCajas.dataset.index = index.toString();
 
-tdFisico.classList.add("col-conteo");
-tdFisico.appendChild(inputCajas);
-tr.appendChild(tdFisico);
+        tdFisico.appendChild(inputCajas);
+        tr.appendChild(tdFisico);
 
         const tdUnid = document.createElement("td");
         tdUnid.className = "col-units";
@@ -1136,7 +1216,8 @@ tr.appendChild(tdFisico);
         inputUnid.step = "1";
         inputUnid.className = "input-count";
         inputUnid.value =
-          item.fisicoUnidades !== null && item.fisicoUnidades !== undefined
+          item.fisicoUnidades !== null &&
+          item.fisicoUnidades !== undefined
             ? item.fisicoUnidades
             : "";
         inputUnid.dataset.index = index.toString();
@@ -1156,18 +1237,16 @@ tr.appendChild(tdFisico);
         tdStatus.appendChild(statusSpan);
         tr.appendChild(tdStatus);
 
-      inputCajas.onblur = () => {
-  handleCountChange(index, "cajas", inputCajas, tdDiff, statusSpan);
-};
+        inputCajas.onblur = () => {
+          handleCountChange(index, "cajas", inputCajas, tdDiff, statusSpan);
+        };
 
-inputUnid.onblur = () => {
-  handleCountChange(index, "unidades", inputUnid, tdDiff, statusSpan);
-};
-
+        inputUnid.onblur = () => {
+          handleCountChange(index, "unidades", inputUnid, tdDiff, statusSpan);
+        };
 
         tbodyCajas.appendChild(tr);
       });
-
     }
 
     function renderTableSueltas() {
@@ -1204,7 +1283,8 @@ inputUnid.onblur = () => {
         const tdUnid = document.createElement("td");
         tdUnid.className = "col-units";
         tdUnid.textContent =
-          item.fisicoUnidades !== null && item.fisicoUnidades !== undefined
+          item.fisicoUnidades !== null &&
+          item.fisicoUnidades !== undefined
             ? item.fisicoUnidades
             : "";
         tr.appendChild(tdUnid);
@@ -1228,38 +1308,38 @@ inputUnid.onblur = () => {
       });
     }
 
-function handleCountChange(index, tipo, inputEl, tdDiff, statusSpan) {
-  const item = inventoryCajas[index];
+    function handleCountChange(index, tipo, inputEl, tdDiff, statusSpan) {
+      const item = inventoryCajas[index];
 
- 
-  const nuevoValor =
-    inputEl.value === "" ? null : Number(inputEl.value);
+      const nuevoValor =
+        inputEl.value === "" ? null : Number(inputEl.value);
 
-  
-  if (tipo === "cajas") {
-    item.fisicoCajas = nuevoValor;
-  } else {
-    item.fisicoUnidades = nuevoValor;
-  }
+      if (tipo === "cajas") {
+        item.fisicoCajas = nuevoValor;
+      } else {
+        item.fisicoUnidades = nuevoValor;
+      }
 
+      const diff = calculateDiff(item.sistema, item.fisicoCajas);
+      tdDiff.textContent = formatDiff(diff);
+      tdDiff.className = "col-diff " + diffClass(diff);
 
-  const diff = calculateDiff(item.sistema, item.fisicoCajas);
-  tdDiff.textContent = formatDiff(diff);
-  tdDiff.className = "col-diff " + diffClass(diff);
+      applyStatusStyle(statusSpan, diff);
 
-  // Actualizar estado visual
-  applyStatusStyle(statusSpan, diff);
+      // Sincronizar con filas originales Sage
+      syncWithSage(item);
 
-  // Progreso y guardado
-  actualizarProgreso();
-  guardarEstadoPIC();
-}
+      actualizarProgreso();
+      guardarEstadoPIC();
+      renderTableSueltas();
+    }
 
-
-   
+    // Sincronizar objeto de la tabla con fila original de Sage
     function syncWithSage(item) {
+      if (!H.colCodigo) return;
       const idx = sageIndexByCodigo.get(item.codigo);
       if (idx === undefined) return;
+
       const row = sageRows[idx];
       const diff = calculateDiff(item.sistema, item.fisicoCajas);
 
@@ -1275,116 +1355,92 @@ function handleCountChange(index, tipo, inputEl, tdDiff, statusSpan) {
       }
     }
 
-  
-btnReset.addEventListener("click", () => {
-  if (!inventoryCajas.length) {
-    alert("Primero carga un archivo de Sage.");
-    return;
-  }
+    // ----------- Botón Reiniciar -----------
+    btnReset.addEventListener("click", () => {
+      if (!inventoryCajas.length) {
+        alert("Primero carga un archivo de Sage.");
+        return;
+      }
 
-  const ok = confirm(
-    "¿Seguro que deseas reiniciar TODOS los conteos físicos?\nEsta acción no se puede deshacer."
-  );
-  if (!ok) return;
+      const ok = confirm(
+        "¿Seguro que deseas reiniciar TODOS los conteos físicos?\nEsta acción no se puede deshacer."
+      );
+      if (!ok) return;
 
-  // Borrar el estado guardado en el navegador
-  localStorage.removeItem("PIC_ESTADO");
+      localStorage.removeItem("PIC_ESTADO");
 
-  // Aquí abajo sigue tu lógica de reinicio
-  inventoryCajas.forEach((item) => {
-    item.fisicoCajas = null;
-    item.fisicoUnidades = null;
-    item.lockCajas = false;
-    item.lockUnidades = false;
-  });
+      inventoryCajas.forEach((item) => {
+        item.fisicoCajas = null;
+        item.fisicoUnidades = null;
+        item.lockCajas = false;
+        item.lockUnidades = false;
+      });
 
-  sageRows.forEach((row) => {
-    if (H.colCuentaFisica) row[H.colCuentaFisica] = "";
-    if (H.colDiferencia) row[H.colDiferencia] = "";
-  });
+      sageRows.forEach((row) => {
+        if (H.colCuentaFisica) row[H.colCuentaFisica] = "";
+        if (H.colDiferencia) row[H.colDiferencia] = "";
+      });
 
-  renderTableCajas();
-  renderTableSueltas();
-  actualizarProgreso();
-});
-// ----------- Botón Reiniciar -----------
-btnReset.addEventListener("click", () => {
-  if (!inventoryCajas.length) {
-    alert("Primero carga un archivo de Sage.");
-    return;
-  }
+      renderTableCajas();
+      renderTableSueltas();
+      actualizarProgreso();
+    });
 
-  const ok = confirm(
-    "¿Seguro que deseas reiniciar TODOS los conteos físicos?\nEsta acción no se puede deshacer."
-  );
-  if (!ok) return;
-
-    localStorage.removeItem("PIC_ESTADO");
-
-  // Lógica de reinicio
-  inventoryCajas.forEach((item) => {
-    item.fisicoCajas = null;
-    item.fisicoUnidades = null;
-    item.lockCajas = false;
-    item.lockUnidades = false;
-  });
-
-  sageRows.forEach((row) => {
-    if (H.colCuentaFisica) row[H.colCuentaFisica] = "";
-    if (H.colDiferencia) row[H.colDiferencia] = "";
-  });
-
-  renderTableCajas();
-  renderTableSueltas();
-  actualizarProgreso();
-});
-
-// ---------- Botón Exportar ----------
+    // ---------- Botón Exportar (actualiza SOLO el archivo Sage) ----------
 btnExportExcel.addEventListener("click", () => {
-  if (!sageRows || !sageRows.length) {
-    alert("Primero carga un archivo de Sage.");
-    return;
-  }
+  try {
+    // 1) Verificar que haya inventario cargado
+    if (!Array.isArray(inventoryCajas) || !inventoryCajas.length) {
+      alert("Primero carga un archivo de Sage.");
+      return;
+    }
 
-  const inputNombre = document.getElementById("nombreInspector");
-  if (!inputNombre) {
-    alert("No se encontró el campo del responsable.");
-    return;
-  }
+    // 2) Verificar que Sage está en memoria (encabezados + filas)
+    if (
+      !Array.isArray(sageHeaders) || !sageHeaders.length ||
+      !Array.isArray(sageRows)    || !sageRows.length
+    ) {
+      alert("No hay datos de Sage cargados.");
+      return;
+    }
 
-  let nombrePersona = inputNombre.value.trim();
-  if (!nombrePersona) {
-    alert("Escribe el nombre del responsable.");
-    return;
-  }
+    const inputNombre = document.getElementById("nombreInspector");
+    if (!inputNombre) {
+      alert("No se encontró el campo del responsable.");
+      return;
+    }
 
-  nombrePersona = nombrePersona.replace(/[\\\/:*?"<>|]/g, "_");
+    let nombrePersona = inputNombre.value.trim();
+    if (!nombrePersona) {
+      alert("Escribe el nombre del responsable.");
+      return;
+    }
 
-  if (Array.isArray(inventoryCajas)) {
+    // limpiar nombre de archivo
+    nombrePersona = nombrePersona.replace(/[\\\/:*?"<>|]/g, "_");
+
+    // 3) Actualizar SOLO "Cuenta física" y "Diferencia" en sageRows
     inventoryCajas.forEach((item, index) => {
       const row = sageRows[index];
       if (!row) return;
 
-      if (H.colSistema && item.sistema !== undefined) {
-        row[H.colSistema] = item.sistema;
-      }
-
+      // Conteo físico
       if (H.colCuentaFisica) {
-        row[H.colCuentaFisica] = item.fisicoCajas != null ? item.fisicoCajas : "";
+        row[H.colCuentaFisica] =
+          item.fisicoCajas === null || item.fisicoCajas === undefined
+            ? ""
+            : item.fisicoCajas;
       }
 
+      // Diferencia
       if (H.colDiferencia) {
         const sisRaw = item.sistema;
         const fisRaw = item.fisicoCajas;
 
         let diff = "";
         if (
-          sisRaw !== "" &&
-          sisRaw !== null &&
-          sisRaw !== undefined &&
-          fisRaw !== "" &&
-          fisRaw !== null &&
-          fisRaw !== undefined
+          sisRaw !== "" && sisRaw !== null && sisRaw !== undefined &&
+          fisRaw !== "" && fisRaw !== null && fisRaw !== undefined
         ) {
           const sis = Number(sisRaw);
           const fis = Number(fisRaw);
@@ -1396,56 +1452,76 @@ btnExportExcel.addEventListener("click", () => {
         row[H.colDiferencia] = diff === "" ? "" : diff;
       }
     });
-  }
 
-  const aoa = [];
-  aoa.push(sageHeaders);
+        // 4) Construir la matriz AoA a partir de sageHeaders + sageRows   
+    const aoa = [];
 
-  sageRows.forEach((row) => {
-    const rowArr = sageHeaders.map((h) => row[h] ?? "");
-    aoa.push(rowArr);
-  });
+    // Encabezados originales + nueva columna
+    const headersExport = [...sageHeaders, "Unidades sueltas"];
+    aoa.push(headersExport);
 
-  const ws = XLSX.utils.aoa_to_sheet(aoa);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Inventario");
+    // Filas
+    sageRows.forEach((rowObj, index) => {
+      // Datos originales en el mismo orden
+      const rowArr = sageHeaders.map((h) =>
+        rowObj[h] !== undefined && rowObj[h] !== null ? rowObj[h] : ""
+      );
+    
+      const item = inventoryCajas[index];
+      const sueltas =
+        item && item.fisicoUnidades != null ? item.fisicoUnidades : "";
 
-  const fecha = new Date().toISOString().slice(0, 10);
-  const nombreArchivo = `Inventario_${nombrePersona}_${fecha}.xlsx`;
+      // Agregar como última columna
+      rowArr.push(sueltas);
 
-  XLSX.writeFile(wb, nombreArchivo);
-});
-// ====== SEGURIDAD SOLO AL EDITAR UN VALOR ======
-let valorAnteriorConteo = "";
+      aoa.push(rowArr);
+    });
 
-document.addEventListener("focusin", function (e) {
-  if (!e.target.classList.contains("input-count")) return;
-  valorAnteriorConteo = e.target.value || "";
-});
 
-document.addEventListener("change", function (e) {
-  if (!e.target.classList.contains("input-count")) return;
+    // 5) Crear y descargar el Excel
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Sage");
 
-  const nuevoValor = e.target.value || "";
-
-  // Si antes estaba vacío y ahora hay algo → primer conteo (SIN contraseña)
-  if (valorAnteriorConteo === "" && nuevoValor !== "") {
-    return;
-  }
-
-  // Si no cambió realmente el valor → no hace nada
-  if (valorAnteriorConteo === nuevoValor) {
-    return;
-  }
-
-  const pass = prompt("Ingrese la contraseña para modificar un conteo:");
-
-  if (pass !== "2025") {   // <<< SI TU CLAVE ES OTRA, LA CAMBIO POR TI
-    e.target.value = valorAnteriorConteo;
+    XLSX.writeFile(wb, `PIC_Sage_${nombrePersona}.xlsx`);
+  } catch (err) {
+    console.error(err);
+    alert("Error exportando el archivo Sage: " + err.message);
   }
 });
 
+
+    // ====== SEGURIDAD SOLO AL EDITAR UN VALOR ======
+    let valorAnteriorConteo = "";
+
+    document.addEventListener("focusin", function (e) {
+      if (!e.target.classList.contains("input-count")) return;
+      valorAnteriorConteo = e.target.value || "";
+    });
+
+    document.addEventListener("change", function (e) {
+      if (!e.target.classList.contains("input-count")) return;
+
+      const nuevoValor = e.target.value || "";
+
+      if (valorAnteriorConteo === "" && nuevoValor !== "") {
+        return;
+      }
+
+      if (valorAnteriorConteo === nuevoValor) {
+        return;
+      }
+
+      const pass = prompt(
+        "Ingrese la contraseña para modificar un conteo:"
+      );
+
+      if (pass !== SUPERVISOR_PIN) {
+        e.target.value = valorAnteriorConteo;
+      }
+    });
   </script>
+
 <script>
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("/sw.js")
@@ -1453,14 +1529,14 @@ document.addEventListener("change", function (e) {
         console.error("Error registrando el service worker", err);
       });
   }
-// ===============================
-// 💾 GUARDADO REAL DE CONTEOS
-// ===============================
 
 function guardarEstadoPIC() {
   const estado = {
     cajas: inventoryCajas,
-    responsable: document.getElementById("nombreInspector")?.value || ""
+    responsable: document.getElementById("nombreInspector")?.value || "",
+        sageAoA: Array.isArray(sageAoA) ? sageAoA : null,
+    idxCuentaFisica,
+    idxDiferencia
   };
 
   localStorage.setItem("PIC_ESTADO", JSON.stringify(estado));
@@ -1471,6 +1547,22 @@ function cargarEstadoPIC() {
   if (!data) return;
 
   const estado = JSON.parse(data);
+
+    if (estado.sageAoA && Array.isArray(estado.sageAoA)) {
+    sageAoA = estado.sageAoA;
+    sageHeaders = sageAoA[0].map(c => String(c));
+
+    idxCuentaFisica = typeof estado.idxCuentaFisica === "number"
+      ? estado.idxCuentaFisica
+      : -1;
+
+    idxDiferencia = typeof estado.idxDiferencia === "number"
+      ? estado.idxDiferencia
+      : -1;
+
+    sageCargado = true;
+    guardarEstadoPIC(); 
+  }
 
   if (estado.cajas && Array.isArray(estado.cajas)) {
     inventoryCajas = estado.cajas;
@@ -1485,19 +1577,6 @@ function cargarEstadoPIC() {
   actualizarProgreso();
 }
 
-// Guardar AUTOMÁTICAMENTE cuando escribes
-document.addEventListener("input", function (e) {
-  if (e.target.classList.contains("input-count")) {
-    guardarEstadoPIC();
-  }
-});
-
-// Cargar AUTOMÁTICAMENTE al abrir la app
-window.addEventListener("load", function () {
-  cargarEstadoPIC();
-});
-
-
 document.addEventListener("input", function (e) {
   if (e.target.classList.contains("input-count")) {
     guardarEstadoPIC();
@@ -1507,7 +1586,18 @@ document.addEventListener("input", function (e) {
 window.addEventListener("load", function () {
   cargarEstadoPIC();
 });
-// --------- Estado según diferencia ---------
+
+
+document.addEventListener("input", function (e) {
+  if (e.target.classList.contains("input-count")) {
+    guardarEstadoPIC();
+  }
+});
+
+window.addEventListener("load", function () {
+  cargarEstadoPIC();
+});
+
 function getEstadoFromDiff(diff) {
   if (diff === 0) return "OK";
   if (Math.abs(diff) <= 2) return "REVISAR";
