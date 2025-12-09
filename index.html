@@ -1175,7 +1175,7 @@ inventoryCajas = sageRows.map((row, index) => {
 
       inventoryCajas.forEach((item, index) => {
         if (!item.codigo && !item.descripcion) return;
-
+  
         const hayFiltro = texto.length > 0;
         const coincideTexto =
           !hayFiltro ||
@@ -1265,6 +1265,8 @@ inventoryCajas = sageRows.map((row, index) => {
 
         inputCajas.onblur = () => {
           handleCountChange(index, "cajas", inputCajas, tdDiff, statusSpan);
+          renderTablaSueltas();
+
         };
 
         inputUnid.onblur = () => {
@@ -1559,10 +1561,7 @@ btnExportExcel.addEventListener("click", () => {
 function guardarEstadoPIC() {
   const estado = {
     cajas: inventoryCajas,
-    responsable: document.getElementById("nombreInspector")?.value || "",
-        sageAoA: Array.isArray(sageAoA) ? sageAoA : null,
-    idxCuentaFisica,
-    idxDiferencia
+    responsable: document.getElementById("nombreInspector")?.value || ""
   };
 
   localStorage.setItem("PIC_ESTADO", JSON.stringify(estado));
@@ -1602,16 +1601,6 @@ function cargarEstadoPIC() {
 
   actualizarProgreso();
 }
-
-document.addEventListener("input", function (e) {
-  if (e.target.classList.contains("input-count")) {
-    guardarEstadoPIC();
-  }
-});
-
-window.addEventListener("load", function () {
-  cargarEstadoPIC();
-});
 
 
 document.addEventListener("input", function (e) {
