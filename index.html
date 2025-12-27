@@ -27,12 +27,36 @@
       --warn: #f59e0b;
       --ok: #10b981;
     }
+/* ====== VARIABLES DE TEMA ====== */
+
+body[data-theme="dark"] {
+  --bg-main: #070b14;
+  --bg-card: #0f172a;
+  --text-main: #e5e7eb;
+  --text-muted: #9ca3af;
+  --accent: #22d3ee;
+}
+
+body[data-theme="light"] {
+  --bg-main: #f4f6f8;
+  --bg-card: #ffffff;
+  --text-main: #111827;
+  --text-muted: #6b7280;
+  --accent: #0284c7;
+}
+body[data-theme="dark"] {
+  background: radial-gradient(circle at top, #111827 0%, #020617 45%, #000 100%);
+}
+
+body[data-theme="light"] {
+  background: #f4f6f8;
+}
+
     body {
       margin: 0;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
         sans-serif;
-      background: radial-gradient(circle at top, #111827 0, #020617 45%, #000 100%);
-      color: var(--text-main);
+        color: var(--text-main);
       min-height: 100vh;
       display: flex;
       align-items: center;
@@ -45,7 +69,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: radial-gradient(circle at top, #020617 0, #000 55%);
+      background: var(--bg-main);
       z-index: 50;
       flex-direction: column;
       gap: 1.5rem;
@@ -98,18 +122,21 @@
       padding: 1.75rem 2rem 2rem;
       backdrop-filter: blur(18px);
     }
-    .header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 1.5rem;
-      gap: 1.25rem;
-    }
-    .header-main {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
+  .header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  gap: 1.25rem;
+  position: relative; /* ← AQUÍ va */
+}
+
+.header-main {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
     .header-logo {
       width: 80px;
       height: auto;
@@ -385,6 +412,71 @@
       color: var(--warn);
       border: 1px solid rgba(245, 158, 11, 0.6);
     }
+     color: var(--ok);
+      border: 1px solid rgba(16, 185, 129, 0.55);
+    }
+    .status-warn {
+      background: rgba(245, 158, 11, 0.08);
+      color: var(--warn);
+      border: 1px solid rgba(245, 158, 11, 0.6);
+    }
+    .status-alert {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--danger);
+  border: 1px solid rgba(239, 68, 68, 0.7);
+}
+
+/* ===== TOGGLE + BADGE ===== */
+.anniversary-wrap {
+  position: absolute;
+  top: 18px;
+  right: 24px;
+}
+
+/* BADGE queda normal */
+.anniversary-badge {
+  display: inline-block;
+}
+
+/* TOGGLE ARRIBA DEL BADGE */
+.theme-toggle {
+  position: absolute;
+  bottom: 100%;     /* 👈 CLAVE: se va arriba */
+  right: 0;
+  margin-bottom: 6px;
+
+  background: transparent;
+  border: none;
+  color: var(--accent);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 900px) {
+  .card {
+    padding: 1.2rem 1rem 1.5rem;
+  }
+
+  .header-main {
+    flex-direction: row;
+  }
+}
+
+    @media (max-width: 900px) {
+      .card {
+        padding: 1.2rem 1rem 1.5rem;
+      }
+
+      .header-main {
+        flex-direction: row;
+      }
+      .header-logo {
+        width: 65px;
+      }
     .status-alert {
       background: rgba(239, 68, 68, 0.1);
       color: var(--danger);
@@ -459,6 +551,43 @@ min-width: 100%;
   .table-wrapper td {
     display: none;
   }
+.header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+}
+
+.anniversary-wrap {
+  position: absolute;
+  top: 18px;
+  right: 24px;
+}
+
+/* badge normal */
+.anniversary-badge {
+  display: inline-block;
+}
+
+/* luna FORZADA arriba */
+.theme-toggle {
+  position: absolute;
+  top: -18px;        /* 👈 LA SUBE ARRIBA DEL TEXTO */
+  right: 0;
+  background: transparent;
+  border: none;
+  color: var(--accent);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
 
   /* MOSTRAR SOLO:
      - 1: Código
@@ -504,7 +633,7 @@ min-width: 100%;
 
   </style>
 </head>
-<body>
+<body data-theme="dark">
   <!-- Splash con logo -->
   <div id="splash">
     <!-- 🔁 Cambia el src por la ruta real de tu logo -->
@@ -516,24 +645,25 @@ min-width: 100%;
   <!-- App -->
   <div id="app">
     <div class="card">
-      <header class="header">
-        <div class="header-main">
-          <!-- 🔁 Cambia el src por la ruta real de tu logo -->
-          <img
-            class="header-logo"
-            src="logo_pic.png"
-            alt="Luquisa"
-          />
-          <div class="header-title">
-            <h1>PIC</h1>
-            <h2>Professional Inventory Control</h2>
-            <p class="header-sub">
-              Módulo de toma física de inventario · Versión 1.0
-            </p>
-          </div>
-        </div>
-        <span class="badge-version">Luquisa · 26 Aniversario</span>
-      </header>
+       <header class="header">
+  <div class="header-left">
+    <div class="header-main">
+      <img class="header-logo" src="logo_pic.png" alt="PIC" />
+      <div class="header-title">
+        <h1>PIC</h1>
+        <h2>Professional Inventory Control</h2>
+        <p class="header-sub">
+          Módulo de toma física de inventario · Versión 1.0
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="anniversary-wrap">
+  <button id="themeToggle" class="theme-toggle">🌙</button>
+    <span class="anniversary-badge">LUQUISA · 26 ANIVERSARIO</span>
+  </div>
+</header>
 
       <div class="top-controls">
         <button id="btnLoadExcel" class="btn btn-primary">
@@ -1754,11 +1884,28 @@ function exportResumenEjecutivoExcel() {
 
   cont.innerHTML = html;
 }
+  // BOTÓN EXPORTAR
+  btnExportResumen.addEventListener("click", () => {
+    exportResumenEjecutivoExcel();
+  });
 
-btnExportResumen.addEventListener("click", () => {
-  exportResumenEjecutivoExcel();
-});
+  // TOGGLE TEMA
+  const toggleBtn = document.getElementById("themeToggle");
 
+  // Cargar tema guardado
+  const savedTheme = localStorage.getItem("pic-theme") || "dark";
+  document.body.setAttribute("data-theme", savedTheme);
+  toggleBtn.textContent = savedTheme === "dark" ? "🌙" : "☀️";
+
+  toggleBtn.addEventListener("click", () => {
+    const current = document.body.getAttribute("data-theme");
+    const next = current === "dark" ? "light" : "dark";
+
+    document.body.setAttribute("data-theme", next);
+    localStorage.setItem("pic-theme", next);
+    toggleBtn.textContent = next === "dark" ? "🌙" : "☀️";
+  });
 </script>
 </body>
 </html>
+
