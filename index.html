@@ -48,8 +48,69 @@ body[data-theme="dark"] {
   background: radial-gradient(circle at top, #111827 0%, #020617 45%, #000 100%);
 }
 
+/* =========================
+   MODO CLARO – FIX MOBILE
+========================= */
+
 body[data-theme="light"] {
   background: #f4f6f8;
+}
+
+/* Card en modo claro */
+body[data-theme="light"] .card {
+  background: #ffffff;
+  border: 1px solid rgba(0,0,0,0.08);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+  backdrop-filter: none;
+}
+
+/* Texto */
+body[data-theme="light"] {
+  color: #111827;
+}
+
+body[data-theme="light"] .header-sub,
+body[data-theme="light"] label,
+body[data-theme="light"] .muted {
+  color: #4b5563;
+}
+
+/* Inputs */
+body[data-theme="light"] input,
+body[data-theme="light"] select {
+  background: #f9fafb;
+  color: #111827;
+  border: 1px solid rgba(0,0,0,0.15);
+}
+
+/* Tabs */
+body[data-theme="light"] .tabs button {
+  color: #374151;
+}
+
+body[data-theme="light"] .tabs button.active {
+  color: #0284c7;
+  border-bottom-color: #0284c7;
+}
+
+@media (max-width: 480px) {
+
+  body[data-theme="light"] .card {
+    padding: 1rem;
+  }
+
+  body[data-theme="light"] .btn {
+    padding: 0.7rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  body[data-theme="light"] .header-logo {
+    width: 60px;
+  }
+
+  body[data-theme="light"] .header-title h1 {
+    font-size: 1.1rem;
+  }
 }
 
     body {
@@ -62,6 +123,17 @@ body[data-theme="light"] {
       align-items: center;
       justify-content: center;
     }
+/* ===== OVERRIDE FINAL PARA MODO CLARO ===== */
+body[data-theme="light"] {
+  background: #f4f6f8;
+  color: #111827;
+}
+body[data-theme="light"] .card {
+  background: #ffffff;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
     /* Splash */
     #splash {
       position: fixed;
