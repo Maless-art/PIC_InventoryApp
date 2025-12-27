@@ -720,6 +720,14 @@ body[data-theme="light"] td {
 body[data-theme="light"] tr {
   background: transparent;
 }
+/* ===== FIX: CÓDIGOS LEGIBLES EN MODO CLARO ===== */
+body[data-theme="light"] td:first-child,
+body[data-theme="light"] .code,
+body[data-theme="light"] .codigo {
+  color: #111827 !important;
+  opacity: 1 !important;
+  font-weight: 600;
+}
 
   </style>
 </head>
