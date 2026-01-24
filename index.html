@@ -2,1120 +2,2007 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>SMV • Simplemente Viejos</title>
-<meta name="theme-color" content="#07140e" />
-
-<!-- iOS PWA -->
+  <title>PIC – Professional Inventory Control</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#020617">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="SMV">
-
-<link rel="apple-touch-icon" href="smv-512-icon.png">
-<link rel="icon" type="image/png" href="smv-512-icon.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="SMV">
-
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="PIC">
+<link rel="manifest" href="manifest.webmanifest">
+  <!-- Estilos básicos -->
   <style>
-    :root{
-      --bg:#07140e;
-      --green:#18c26e;
-      --white:#f3fff9;
-      --muted:#a8c7b8;
-      --stroke:rgba(255,255,255,.10);
-      --shadow: 0 14px 40px rgba(0,0,0,.45);
-      --r:18px;
+    * {
+      box-sizing: border-box;
     }
-html, body{
-  background: #07140e; /* IMPORTANTÍSIMO para que iOS no la ponga blanca */
-}
-.wrap{ padding-top: env(safe-area-inset-top); }
+    :root {
+      --bg-main: #050816;
+      --bg-card: #101827;
+      --accent: #00b4d8;
+      --accent-soft: rgba(0, 180, 216, 0.12);
+      --accent-strong: #06d6a0;
+      --text-main: #e5e7eb;
+      --text-muted: #9ca3af;
+      --border-soft: #1f2933;
+      --danger: #ef4444;
+      --warn: #f59e0b;
+      --ok: #10b981;
+    }
+/* ====== VARIABLES DE TEMA ====== */
 
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,"Helvetica Neue",Arial;
-      background:
-        radial-gradient(1000px 520px at 20% 0%, rgba(24,194,110,.15), transparent 60%),
-        radial-gradient(900px 520px at 90% 10%, rgba(255,255,255,.06), transparent 55%),
-        linear-gradient(180deg, #050f0b 0%, var(--bg) 55%, #040b08 100%);
-      color:var(--white);
-      min-height:100vh;
-    }
-    .wrap{max-width:1100px;margin:0 auto;padding:18px}
-
-    .topbar{
-      display:flex;align-items:center;justify-content:flex-start;gap:12px;
-      padding:14px 16px;border:1px solid var(--stroke);
-      border-radius:calc(var(--r) + 8px);
-      background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
-      box-shadow:var(--shadow);
-      backdrop-filter: blur(10px);
-    }
-    .brand{display:flex;align-items:center;gap:12px}
-    .logoSMV{
-      width:80px;height:80px;object-fit:contain;border-radius:12px;
-    }
-
-    .tabs{display:flex;gap:10px;align-items:center;margin-top:14px}
-    .tab{
-      padding:10px 14px;border-radius:999px;border:1px solid var(--stroke);
-      background:rgba(255,255,255,.03);
-      color:var(--muted);font-weight:900;font-size:13px;cursor:pointer;
-    }
-    .tab.active{
-      color:var(--white);
-      border-color: rgba(24,194,110,.55);
-      background:linear-gradient(180deg, rgba(24,194,110,.22), rgba(24,194,110,.08));
-    }
-
-    .grid{display:grid;grid-template-columns:1fr;gap:16px;margin-top:16px}
-    .card{
-      border:1px solid var(--stroke);
-      border-radius:var(--r);
-      background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
-      box-shadow:var(--shadow);
-      overflow:hidden;
-    }
-    .hd{
-      padding:14px 16px;
-      display:flex;align-items:center;justify-content:space-between;gap:10px;
-      border-bottom:1px solid rgba(255,255,255,.08);
-      background:linear-gradient(180deg, rgba(255,255,255,.02), transparent);
-    }
-    .title{display:flex;flex-direction:column;gap:6px}
-    .title span{font-size:12px;color:var(--muted)}
-    .pill{
-      font-size:11px;color:var(--white);
-      padding:6px 10px;border-radius:999px;
-      border:1px solid rgba(255,255,255,.14);
-      background:rgba(255,255,255,.04);
-      white-space:nowrap;
-    }
-    .cardTitle{font-size:22px;font-weight:900;letter-spacing:.4px}
-
-    .btn{
-      padding:10px 14px;border-radius:12px;border:1px solid rgba(24,194,110,.55);
-      background:linear-gradient(180deg, rgba(24,194,110,.28), rgba(24,194,110,.10));
-      color:var(--white);font-weight:900;font-size:13px;cursor:pointer;
-    }
-    .btn:active{transform:translateY(1px)}
-    .btnGhost{
-      border-color:var(--stroke);
-      background:rgba(255,255,255,.03);
-      font-weight:900;
-    }
-    .btnDanger{
-      border-color: rgba(255,255,255,.18);
-      background: rgba(255,255,255,.03);
-      color: rgba(255,255,255,.85);
-      font-weight:900;
-    }
-
-    .content{padding:16px}
-    .row2{display:grid;grid-template-columns: 1fr 1fr;gap:12px}
-    @media (max-width: 720px){ .row2{grid-template-columns:1fr} }
-
-    label{display:block;font-size:12px;color:var(--muted);margin:0 0 6px 2px}
-    input{
-      width:100%;
-      padding:12px 12px;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(0,0,0,.22);
-      color:var(--white);
-      outline:none;
-    }
-    input:focus{
-      border-color: rgba(24,194,110,.55);
-      box-shadow:0 0 0 3px rgba(24,194,110,.12)
-    }
-    .sectionTitle{
-      margin:16px 0 10px;
-      display:flex;align-items:center;justify-content:space-between;gap:10px;
-      color:var(--muted);font-weight:900;font-size:12px;letter-spacing:.4px;
-      text-transform:uppercase;
-    }
-    .inputsGrid{display:grid;grid-template-columns:1fr;gap:10px}
-
-    .toast{
-      position:fixed;left:50%;bottom:18px;transform:translateX(-50%);
-      background:rgba(0,0,0,.55);
-      border:1px solid rgba(255,255,255,.14);
-      color:var(--white);
-      padding:10px 12px;border-radius:14px;
-      box-shadow:var(--shadow);
-      opacity:0;pointer-events:none;
-      transition:opacity .18s ease;
-      font-size:13px;font-weight:900;
-      max-width:min(520px, calc(100vw - 28px));
-      text-align:center;
-      backdrop-filter: blur(10px);
-    }
-    .toast.show{opacity:1}
-
-    /* Equipos */
-    .gkBox{
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(0,0,0,.18);
-      border-radius:16px;
-      padding:12px;
-    }
-    .divider{height:1px;background:rgba(255,255,255,.08); margin:14px 0}
-    .teamsGrid{
-      display:grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap:12px;
-      margin-top:12px;
-    }
-    @media (max-width: 900px){ .teamsGrid{grid-template-columns:1fr} }
-
-    .teamCard{
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(0,0,0,.18);
-      border-radius:16px;
-      padding:12px;
-    }
-    .teamHead{
-      display:flex;align-items:center;justify-content:space-between;gap:10px;
-      margin-bottom:10px;
-    }
-    .teamHead b{font-size:13px;letter-spacing:.3px}
-    .tag{
-      font-size:11px;font-weight:900;
-      padding:6px 10px;border-radius:999px;
-      border:1px solid rgba(24,194,110,.55);
-      background:rgba(24,194,110,.12);
-    }
-    .list{display:grid;gap:8px}
-    .item{
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.03);
-      border-radius:14px;
-      padding:10px 10px;
-      display:flex;align-items:center;justify-content:space-between;gap:10px;
-      font-weight:800;
-    }
-    .muted{color:var(--muted);font-weight:900;font-size:12px}
-
-    .kitSelect{
-      background:rgba(0,0,0,.25);
-      color:var(--white);
-      border:1px solid rgba(255,255,255,.15);
-      border-radius:10px;
-      padding:6px 8px;
-      font-weight:800;
-      font-size:12px;
-    }
-    .kitSelect option{ color:#000; }
-    .kitDot{
-      width:14px;height:14px;border-radius:999px;display:inline-block;
-      border:1px solid rgba(255,255,255,.25);
-      background: rgba(255,255,255,.08);
-      box-shadow: 0 0 0 3px rgba(0,0,0,.18) inset;
-    }
-
-    /* Cobro */
-    .fee-wrap{display:flex;align-items:center;gap:10px;}
-    .fee-wrap label{opacity:.85;font-size:.95rem;}
-    .fee-wrap input{
-      width:140px;padding:10px 12px;border-radius:12px;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(0,0,0,.25);color:#fff;
-    }
-    .table-wrap{ margin-top:14px; overflow:auto; }
-    .pay-table{ width:100%; border-collapse:separate; border-spacing:0 10px; }
-    .pay-table thead th{ text-align:left; font-weight:700; opacity:.9; padding:8px 10px; }
-    .pay-table thead .subhead th{ font-weight:600; opacity:.75; padding-top:0; }
-    .pay-table tbody td{
-      padding:10px;background:rgba(0,0,0,.20);
-      border-top:1px solid rgba(255,255,255,.08);
-      border-bottom:1px solid rgba(255,255,255,.08);
-    }
-    .pay-table tbody tr td:first-child{
-      border-left:1px solid rgba(255,255,255,.08);
-      border-top-left-radius:14px;border-bottom-left-radius:14px;
-      width:48px;opacity:.9;
-    }
-    .pay-table tbody tr td:last-child{
-      border-right:1px solid rgba(255,255,255,.08);
-      border-top-right-radius:14px;border-bottom-right-radius:14px;
-      width:110px;font-weight:800;
-    }
-    .pay-in{
-      width:110px;padding:10px 10px;border-radius:12px;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(0,0,0,.25);color:#fff;
-    }
-    .saldo-cell{ font-variant-numeric: tabular-nums; }
-    .tfoot-label{ text-align:right; padding:10px; opacity:.85; }
-    .tfoot-value{ font-weight:900; font-variant-numeric: tabular-nums; padding:10px; }
-    .total-ok{ color:#2ee59d; }
-    .total-bad{ color:#ff5a5a; }
-/* COBRO – mejoras visuales */
-.pay-table thead th:nth-child(1),
-.pay-table tbody td:nth-child(1){ width:52px; text-align:center; }
-
-.pay-table thead th:nth-child(3),
-.pay-table thead th:nth-child(4),
-.pay-table tbody td:nth-child(3),
-.pay-table tbody td:nth-child(4){ width:130px; }
-
-.pay-table thead th:last-child,
-.pay-table tbody td:last-child{ width:120px; text-align:right; }
-
-.pay-table tbody td:nth-child(3),
-.pay-table tbody td:nth-child(4){ text-align:right; }
-
-.pay-in{
-  width:100%;
-  text-align:right;
-  font-variant-numeric: tabular-nums;
+body[data-theme="dark"] {
+  --bg-main: #070b14;
+  --bg-card: #0f172a;
+  --text-main: #e5e7eb;
+  --text-muted: #9ca3af;
+  --accent: #22d3ee;
 }
 
-.pay-table tbody td:nth-child(2){
-  font-weight:850;
+body[data-theme="light"] {
+  --bg-main: #f4f6f8;
+  --bg-card: #ffffff;
+  --text-main: #111827;
+  --text-muted: #6b7280;
+  --accent: #0284c7;
+}
+body[data-theme="dark"] {
+  background: radial-gradient(circle at top, #111827 0%, #020617 45%, #000 100%);
 }
 
-.pay-table tbody tr:hover td{
-  border-color: rgba(24,194,110,.35);
-}
-  .pay-table thead th[colspan="2"]{ text-align:center; }
-.pay-table thead .subhead th{ text-align:center; }
-.pay-table thead .subhead th:nth-child(1),
-.pay-table thead .subhead th:nth-child(2){ text-align:left; }
-.appVersion{
-  margin-left:auto;
-  font-size:11px;
-  font-weight:900;
-  letter-spacing:.6px;
-  color:var(--muted);
-  padding:6px 10px;
-  border-radius:999px;
-  border:1px solid var(--stroke);
-  background:rgba(255,255,255,.03);
-}
-.topbar{
-  position: relative;
-  overflow: hidden;
-  display:flex;align-items:center;justify-content:flex-start;gap:12px;
-  padding:14px 16px;border:1px solid var(--stroke);
-  border-radius:calc(var(--r) + 8px);
+/* =========================
+   MODO CLARO – FIX MOBILE
+========================= */
 
-  /* ✅ Fondo base + imagen watermark suave */
-  background:
-    radial-gradient(520px 240px at 72% 52%, rgba(0,0,0,.28), transparent 72%),
-
-    linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)),
-    url("futbol-watermark.jpg");
-
-  background-repeat: no-repeat;
-  background-position: 72% 52%, 0 0, 72% 52%;
-
-  background-size: 560px 260px, auto, 420px auto;
-
-
-  box-shadow:var(--shadow);
-  backdrop-filter: blur(10px);
+body[data-theme="light"] {
+  background: #f4f6f8;
 }
 
-
-.topbar{
-  position: relative;
-  overflow: hidden;
+/* Card en modo claro */
+body[data-theme="light"] .card {
+  background: #ffffff;
+  border: 1px solid rgba(0,0,0,0.08);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+  backdrop-filter: none;
 }
 
-.topbar-watermark{
-  position:absolute;
-  top:50%;
-  right:-550px;            /* 👈 empújalo fuerte a la derecha */
-  width:820px;             /* 👈 mucho más grande */
-  height:320px;
-  transform:translateY(-50%);
-  background:url("futbol-watermark.png") no-repeat center / contain;
-  opacity:0.22;
-  pointer-events:none;
-  z-index:1;
+/* Texto */
+body[data-theme="light"] {
+  color: #111827;
 }
 
-
-
-.topbar .brand,
-.topbar .appVersion{
-  position:relative;
-  z-index:2;
-}
-.topbar::after{
-  content:"";
-  position:absolute;
-  top:0;
-  right:0;
-  width:250px;
-  height:100%;
-  background:linear-gradient(
-    to right,
-    rgba(8,25,18,0),
-    rgba(8,25,18,0.65),
-    rgba(8,25,18,1)
-  );
-  pointer-events:none;
-  z-index:2;
+body[data-theme="light"] .header-sub,
+body[data-theme="light"] label,
+body[data-theme="light"] .muted {
+  color: #4b5563;
 }
 
-body{
-  background:
-    radial-gradient(1200px 600px at 20% 0%, rgba(24,194,110,.18), transparent 60%),
-    linear-gradient(180deg, #030906, #020604);
-  padding:28px;
+/* Inputs */
+body[data-theme="light"] input,
+body[data-theme="light"] select {
+  background: #f9fafb;
+  color: #111827;
+  border: 1px solid rgba(0,0,0,0.15);
 }
 
-/* CONTENEDOR DE APP */
-.app-shell{
-  max-width:1200px;
-  margin:0 auto;
-  background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
-  border-radius:28px;
-  box-shadow:
-    0 40px 120px rgba(0,0,0,.65),
-    inset 0 0 0 1px rgba(255,255,255,.06);
-  overflow:hidden;
-}
-html, body{
-  scrollbar-width: none;
-}
-body::-webkit-scrollbar{
-  display:none;
-}
-/* ===== FIX: header de Equipos en móvil (botones no se esconden) ===== */
-.hd{
-  flex-wrap: wrap;              /* permite que el header haga 2 líneas */
-  align-items: flex-start;
+/* Tabs */
+body[data-theme="light"] .tabs button {
+  color: #374151;
 }
 
-.hd > div:last-child{
-  flex-wrap: wrap;              /* el grupo de botones también hace wrap */
-  justify-content: flex-end;
-  gap: 8px;
-  width: 100%;
+body[data-theme="light"] .tabs button.active {
+  color: #0284c7;
+  border-bottom-color: #0284c7;
 }
 
-@media (max-width: 520px){
-  .hd .btn{
-    padding: 9px 12px;
-    border-radius: 12px;
-    font-size: 12px;
+@media (max-width: 480px) {
+
+  body[data-theme="light"] .card {
+    padding: 1rem;
+  }
+
+  body[data-theme="light"] .btn {
+    padding: 0.7rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  body[data-theme="light"] .header-logo {
+    width: 60px;
+  }
+
+  body[data-theme="light"] .header-title h1 {
+    font-size: 1.1rem;
   }
 }
 
-</style>
-</head>
-
-<body>
-  <div class="wrap">
-    <header class="topbar">
-      <div class="brand">
-<div class="topbar-watermark"></div>
-
-        <img src="smv-app-icon.png" alt="SMV" class="logoSMV">
-        <div>
-          <div style="font-size:22px;font-weight:900;letter-spacing:.5px;">Simplemente Viejos</div>
-          <div style="margin-top:4px;color:var(--muted);font-size:13px;">Registro de birrias</div>
-<span class="appVersion">v1.0.0</span>
-       
- </div>
-      </div>
-    </header>
-
-    <nav class="tabs">
-      <button class="tab active" id="tabLista">Lista</button>
-      <button class="tab" id="tabEquipos">Equipos</button>
-      <button class="tab" id="tabCobro">Cobro</button>
-    </nav>
-
-    <main class="grid">
-      <!-- LISTA -->
-      <section class="card" id="viewLista">
-        <div class="hd">
-          <div class="title">
-            <b class="cardTitle">Lista de jugadores</b>
-          </div>
-          <div style="display:flex; gap:10px; align-items:center;">
-            <span class="pill" id="countPill">0/20</span>
-            <button class="btn" id="btnSortear">Sortear Equipos</button>
-          </div>
-        </div>
-
-        <div class="content">
-          <div class="row2">
-            <div>
-              <label for="matchDate">Fecha</label>
-              <input type="date" id="matchDate" />
-            </div>
-            <div>
-              <label for="matchTime">Hora</label>
-              <input type="time" id="matchTime" />
-            </div>
-          </div>
-
-          <div class="sectionTitle">
-            <span>Porteros (2)</span>
-            <button class="btn btnGhost" id="btnGuardar">Guardar</button>
-          </div>
-          <div class="inputsGrid" id="gkGrid"></div>
-
-          <div class="sectionTitle"><span>Jugadores (18)</span></div>
-          <div class="inputsGrid" id="plGrid"></div>
-        </div>
-      </section>
-
-      <!-- EQUIPOS -->
-      <section class="card" id="viewEquipos" style="display:none">
-        <div class="hd">
-          <div class="title">
-            <b class="cardTitle">Equipos</b>
-            <span id="equiposMeta">Aún no hay sorteo</span>
-          </div>
-          <div style="display:flex; gap:10px; align-items:center;">
-            <button class="btn btnGhost" id="btnReSortear">Re-sortear</button>
-            <button class="btn" id="btnExport">Exportar</button>
-            <button class="btn btnDanger" id="btnReset">Reset</button>
-          </div>
-        </div>
-
-        <div class="content">
-          <div class="gkBox">
-            <div class="muted">PORTEROS (fijos)</div>
-            <div class="list" style="margin-top:10px">
-              <div class="item"><span>1) 🧤 <b id="gkName1">(vacío)</b></span></div>
-              <div class="item"><span>2) 🧤 <b id="gkName2">(vacío)</b></span></div>
-            </div>
-          </div>
-
-          <div class="divider"></div>
-
-          <div class="teamsGrid">
-            <div class="teamCard">
-              <div class="teamHead">
-                <b>Equipo 1</b>
-                <span class="kitDot" id="kitDot1" aria-hidden="true"></span>
-                <select class="kitSelect" id="kit1">
-                  <option value="">Uniforme</option>
-                  <option value="red">Rojo</option>
-                  <option value="blue">Azul</option>
-                  <option value="yellow">Amarillo</option>
-                  <option value="white">Blanco</option>
-                  <option value="black">Negro</option>
-                </select>
-                <span class="tag" id="tag1">6</span>
-              </div>
-              <div class="list" id="list1"></div>
-            </div>
-
-            <div class="teamCard">
-              <div class="teamHead">
-                <b>Equipo 2</b>
-                <span class="kitDot" id="kitDot2" aria-hidden="true"></span>
-                <select class="kitSelect" id="kit2">
-                  <option value="">Uniforme</option>
-                  <option value="red">Rojo</option>
-                  <option value="blue">Azul</option>
-                  <option value="yellow">Amarillo</option>
-                  <option value="white">Blanco</option>
-                  <option value="black">Negro</option>
-                </select>
-                <span class="tag" id="tag2">6</span>
-              </div>
-              <div class="list" id="list2"></div>
-            </div>
-
-            <div class="teamCard">
-              <div class="teamHead">
-                <b>Equipo 3</b>
-                <span class="kitDot" id="kitDot3" aria-hidden="true"></span>
-                <select class="kitSelect" id="kit3">
-                  <option value="">Uniforme</option>
-                  <option value="red">Rojo</option>
-                  <option value="blue">Azul</option>
-                  <option value="yellow">Amarillo</option>
-                  <option value="white">Blanco</option>
-                  <option value="black">Negro</option>
-                </select>
-                <span class="tag" id="tag3">6</span>
-              </div>
-              <div class="list" id="list3"></div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- COBRO -->
-      <section class="card" id="viewCobro" style="display:none">
-        <div class="hd">
-          <div class="title">
-            <b class="cardTitle">Cobro</b>
-            <span>Cuota + pagos por jugador</span>
-          </div>
-        </div>
-
-        <div class="content">
-          <div class="fee-wrap">
-            <label for="feeInput">Cuota del día</label>
-            <input id="feeInput" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0.00">
-          </div>
-
-          <div class="table-wrap">
-            <table class="pay-table">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Jugador</th>
-                  <th colspan="2">Pagó</th>
-                  <th>Saldo</th>
-                </tr>
-                <tr class="subhead">
-                  <th></th><th></th>
-                  <th>Efectivo</th>
-                  <th>Yappy</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody id="payTbody"></tbody>
-              <tfoot>
-                <tr>
-                  <td colspan="4" class="tfoot-label">Total saldo</td>
-                  <td id="totalSaldo" class="tfoot-value">0.00</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div>
-        </div>
-      </section>
-    </main>
-  </div>
-
-  <div class="toast" id="toast"></div>
-
-<script>
-(() => {
-  const LS_KEY = "SMV_v3";
-  const PLAYERS_COUNT = 18; // 18 jugadores + 2 porteros = 20
-  const TEAMS = 3;
-  const PER_TEAM = 6;
-  const COBRO_COUNT = 20;
-
-  const $ = (id) => document.getElementById(id);
-
-  // tabs + views
-  const tabLista = $("tabLista");
-  const tabEquipos = $("tabEquipos");
-  const tabCobro = $("tabCobro");
-
-  const viewLista = $("viewLista");
-  const viewEquipos = $("viewEquipos");
-  const viewCobro = $("viewCobro");
-
-  // lista UI
-  const matchDate = $("matchDate");
-  const matchTime = $("matchTime");
-  const gkGrid = $("gkGrid");
-  const plGrid = $("plGrid");
-  const countPill = $("countPill");
-  const toast = $("toast");
-  const btnGuardar = $("btnGuardar");
-  const btnSortear = $("btnSortear");
-
-  // equipos UI
-  const equiposMeta = $("equiposMeta");
-  const btnReSortear = $("btnReSortear");
-  const btnReset = $("btnReset");
-  const btnExport = $("btnExport");
-
-  const gkName1 = $("gkName1");
-  const gkName2 = $("gkName2");
-  const list1 = $("list1");
-  const list2 = $("list2");
-  const list3 = $("list3");
-  const tag1 = $("tag1");
-  const tag2 = $("tag2");
-  const tag3 = $("tag3");
-
-  const kit1 = $("kit1");
-  const kit2 = $("kit2");
-  const kit3 = $("kit3");
-  const kitDot1 = $("kitDot1");
-  const kitDot2 = $("kitDot2");
-  const kitDot3 = $("kitDot3");
-
-  function showToast(msg){
-    toast.textContent = msg;
-    toast.classList.add("show");
-    setTimeout(()=> toast.classList.remove("show"), 1600);
-  }
-
-  function defaultDate(){
-    const now = new Date();
-    const yyyy = now.getFullYear();
-    const mm = String(now.getMonth()+1).padStart(2,"0");
-    const dd = String(now.getDate()).padStart(2,"0");
-    return `${yyyy}-${mm}-${dd}`;
-  }
-
-  function readState(){
-    try{ return JSON.parse(localStorage.getItem(LS_KEY)) || null; }
-    catch(_){ return null; }
-  }
-  function writeState(state){ localStorage.setItem(LS_KEY, JSON.stringify(state)); }
-
-  function applyKitDot(dotEl, value){
-    if(!dotEl) return;
-    const map = { red:"red", blue:"deepskyblue", yellow:"gold", white:"white", black:"black" };
-    dotEl.style.background = map[value] || "rgba(255,255,255,.08)";
-    dotEl.style.borderColor = value ? "rgba(255,255,255,.45)" : "rgba(255,255,255,.25)";
-  }
-
-  function makeInput(id, placeholder){
-    const el = document.createElement("input");
-    el.type = "text";
-    el.id = id;
-    el.placeholder = placeholder;
-    el.autocomplete = "off";
-    el.spellcheck = false;
-    el.addEventListener("input", () => {
-      saveDraft();
-      updateCount();
-      renderEquipos();
-    });
-    return el;
-  }
-
-  function getFromUI(){
-    const gks = [ $("gk1").value.trim(), $("gk2").value.trim() ];
-    const players = [];
-    for(let i=1;i<=PLAYERS_COUNT;i++) players.push($("p"+i).value.trim());
-    return { gks, players };
-  }
-
-  function saveDraft(){
-    const st = readState() || {};
-    const { gks, players } = getFromUI();
-    st.match = { date: matchDate.value || "", time: matchTime.value || "" };
-    st.gks = gks;
-    st.players = players;
-    st.kits = {
-      team1: kit1?.value || "",
-      team2: kit2?.value || "",
-      team3: kit3?.value || ""
-    };
-    writeState(st);
-  }
-
-  function updateCount(){
-    const { gks, players } = getFromUI();
-    const filled = [...gks, ...players].filter(v => v && v.length>0).length;
-    countPill.textContent = `${filled}/20`;
-  }
-
-  function setUIFromState(st){
-    if(st?.match){
-      if(st.match.date) matchDate.value = st.match.date;
-      if(st.match.time) matchTime.value = st.match.time;
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+        color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    if(Array.isArray(st?.gks)){
-      $("gk1").value = st.gks[0] || "";
-      $("gk2").value = st.gks[1] || "";
+/* ===== OVERRIDE FINAL PARA MODO CLARO ===== */
+body[data-theme="light"] {
+  background: #f4f6f8;
+  color: #111827;
+}
+body[data-theme="light"] .card {
+  background: #ffffff;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+    /* Splash */
+    #splash {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-main);
+      z-index: 50;
+      flex-direction: column;
+      gap: 1.5rem;
     }
-    if(Array.isArray(st?.players)){
-      for(let i=1;i<=PLAYERS_COUNT;i++){
-        $("p"+i).value = st.players[i-1] || "";
+    #splash-logo {
+      width: 170px;
+      height: auto;
+      filter: drop-shadow(0 0 25px rgba(0, 180, 216, 0.7));
+    }
+    #splash-text {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;      
+    }
+    #splash-progress {
+      width: 230px;
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.9);
+      overflow: hidden;
+      box-shadow: 0 0 25px rgba(0, 0, 0, 0.6);
+    }
+    #splash-bar {
+      width: 0;
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-strong));
+      animation: loadBar 1.4s ease-out forwards;
+    }
+    @keyframes loadBar {
+      from { width: 0; }
+      to   { width: 100%; }
+    }
+
+    /* App shell */
+    #app {
+      display: none;
+      width: min(1200px, 100%);
+      padding: 1.5rem;
+    }
+    .card {
+      background: radial-gradient(circle at top left,
+        rgba(15, 23, 42, 0.9) 0,
+        rgba(12, 19, 35, 0.98) 45%,
+        #020617 100%);
+      border-radius: 18px;
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      box-shadow:
+        0 24px 60px rgba(0, 0, 0, 0.75),
+        0 0 0 1px rgba(15, 23, 42, 0.9);
+      padding: 1.75rem 2rem 2rem;
+      backdrop-filter: blur(18px);
+    }
+  .header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  gap: 1.25rem;
+  position: relative; /* ← AQUÍ va */
+}
+
+.header-main {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+    .header-logo {
+      width: 80px;
+      height: auto;
+    }
+    .header-title {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    .header-title h1 {
+      margin: 0;
+      font-size: 1.4rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    .header-title h2 {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--text-main);
+    }
+    .header-sub {
+      margin: 0;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .badge-version {
+      padding: 0.45rem 0.85rem;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--accent-strong);
+      font-size: 0.75rem;
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    /* Top controls */
+    .top-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+      align-items: center;
+    }
+    .btn {
+      border-radius: 999px;
+      border: none;
+      padding: 0.55rem 1.1rem;
+      font-size: 0.85rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      cursor: pointer;
+      font-weight: 500;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      transition: transform 0.08s ease-out, box-shadow 0.08s ease-out,
+        background 0.12s ease-out;
+      white-space: nowrap;
+    }
+    .btn-primary {
+      background: radial-gradient(circle at top left,
+        var(--accent) 0,
+        #0284c7 40%,
+        #0369a1 100%);
+      color: #e5f4ff;
+      box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.4),
+        0 16px 40px rgba(37, 99, 235, 0.45);
+    }
+    .btn-warning {
+      background: radial-gradient(circle at top left,
+        #f97316 0,
+        #ea580c 40%,
+        #c2410c 100%);
+      color: #fff7ed;
+      box-shadow: 0 0 0 1px rgba(248, 153, 72, 0.6),
+        0 16px 40px rgba(248, 153, 72, 0.35);
+    }
+    .btn-secondary {
+      background: radial-gradient(circle at top left,
+        #6366f1 0,
+        #4f46e5 40%,
+        #4338ca 100%);
+      color: #eef2ff;
+      box-shadow: 0 0 0 1px rgba(129, 140, 248, 0.7),
+        0 16px 40px rgba(99, 102, 241, 0.45);
+    }
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.7);
+    }
+    .btn:active {
+      transform: translateY(0);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+    }
+
+    .date-range,
+    .filters-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+      margin-bottom: 0.75rem;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+    .date-range label,
+    .filters-row label {
+      margin-right: 0.2rem;
+    }
+    input[type="date"],
+    select,
+    .search-input {
+      background: rgba(15, 23, 42, 0.9);
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      padding: 0.35rem 0.75rem;
+      color: var(--text-main);
+      font-size: 0.8rem;
+      outline: none;
+      min-width: 130px;
+    }
+    input[type="date"]:focus,
+    select:focus,
+    .search-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.5);
+    }
+
+    .search-input {
+      min-width: 220px;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border-soft);
+      margin: 1rem 0 0.75rem;
+    }
+    .tab-btn {
+      padding: 0.55rem 1rem;
+      font-size: 0.82rem;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      border-bottom: 2px solid transparent;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .tab-btn.active {
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+    .tab-panel {
+      display: none;
+    }
+    .tab-panel.active {
+      display: block;
+    }
+
+    /* Tables */
+    .table-wrapper {
+      border-radius: 14px;
+      border: 1px solid rgba(31, 41, 55, 0.9);
+      overflow: hidden;
+      box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.95);
+      background: radial-gradient(circle at top,
+        rgba(15, 23, 42, 0.96) 0,
+        #020617 60%);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.78rem;
+    }
+    thead {
+      background: linear-gradient(
+        90deg,
+        rgba(15, 23, 42, 0.95),
+        rgba(15, 23, 42, 0.8)
+      );
+    }
+    th,
+    td {
+      padding: 0.4rem 0.6rem;
+      border-bottom: 1px solid rgba(31, 41, 55, 0.85);
+      text-align: left;
+      white-space: nowrap;
+    }
+    th {
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    tbody tr:nth-child(even) {
+      background: rgba(15, 23, 42, 0.75);
+    }
+    tbody tr:nth-child(odd) {
+      background: rgba(15, 23, 42, 0.95);
+    }
+    .col-codigo {
+      width: 80px;
+      font-weight: 600;
+      color: #e5f4ff;
+    }
+    .col-descripcion {
+      min-width: 260px;
+      max-width: 420px;
+      white-space: normal;
+    }
+    .col-um {
+      width: 60px;
+      text-align: center;
+    }
+    .col-num {
+      width: 70px;
+      text-align: right;
+    }
+    .col-input,
+    .col-units {
+      width: 120px;
+      text-align: right;
+    }
+    .input-count {
+      width: 100%;
+      background: rgba(15, 23, 42, 0.8);
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      padding: 0.22rem 0.55rem;
+      color: var(--text-main);
+      font-size: 0.78rem;
+      text-align: right;
+      outline: none;
+    }
+    .input-count:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.6);
+    }
+
+    .col-diff {
+      width: 80px;
+      text-align: right;
+    }
+    .num-neutral {
+      color: var(--text-muted);
+    }
+    .num-positive {
+      color: var(--warn);
+    }
+    .num-negative {
+      color: var(--danger);
+    }
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.12rem 0.55rem;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .status-ok {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--ok);
+      border: 1px solid rgba(16, 185, 129, 0.55);
+    }
+    .status-warn {
+      background: rgba(245, 158, 11, 0.08);
+      color: var(--warn);
+      border: 1px solid rgba(245, 158, 11, 0.6);
+    }
+     color: var(--ok);
+      border: 1px solid rgba(16, 185, 129, 0.55);
+    }
+    .status-warn {
+      background: rgba(245, 158, 11, 0.08);
+      color: var(--warn);
+      border: 1px solid rgba(245, 158, 11, 0.6);
+    }
+    .status-alert {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--danger);
+  border: 1px solid rgba(239, 68, 68, 0.7);
+}
+
+/* ===== TOGGLE + BADGE ===== */
+.anniversary-wrap {
+  position: absolute;
+  top: 18px;
+  right: 24px;
+}
+
+/* BADGE queda normal */
+.anniversary-badge {
+  display: inline-block;
+}
+
+/* TOGGLE ARRIBA DEL BADGE */
+.theme-toggle {
+  position: absolute;
+  bottom: 100%;     /* 👈 CLAVE: se va arriba */
+  right: 0;
+  margin-bottom: 6px;
+
+  background: transparent;
+  border: none;
+  color: var(--accent);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 900px) {
+  .card {
+    padding: 1.2rem 1rem 1.5rem;
+  }
+
+  .header-main {
+    flex-direction: row;
+  }
+}
+
+    @media (max-width: 900px) {
+      .card {
+        padding: 1.2rem 1rem 1.5rem;
+      }
+
+      .header-main {
+        flex-direction: row;
+      }
+      .header-logo {
+        width: 65px;
+      }
+    .status-alert {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--danger);
+      border: 1px solid rgba(239, 68, 68, 0.7);
+    }
+    @media (max-width: 900px) {
+      .card {
+        padding: 1.2rem 1rem 1.5rem;
+      }
+      .header-main {
+        flex-direction: row;
+      }
+      .header-logo {
+        width: 65px;
+      }
+      .header-title h1 {
+        font-size: 1.1rem;
+      }
+      .header-title h2 {
+        font-size: 0.9rem;
+      }
+      .header-sub {
+        font-size: 0.75rem;
       }
     }
-    if(st?.kits){
-      if(kit1) kit1.value = st.kits.team1 || "";
-      if(kit2) kit2.value = st.kits.team2 || "";
-      if(kit3) kit3.value = st.kits.team3 || "";
-    }
-    applyKitDot(kitDot1, kit1?.value);
-    applyKitDot(kitDot2, kit2?.value);
-    applyKitDot(kitDot3, kit3?.value);
-    updateCount();
+/* Tabla PIC: comportamiento general en escritorio */
+.table-wrapper {
+  max-height: 480px;
+  overflow-y: auto;
+  overflow-x: auto;  
+}
+
+.table-wrapper table {
+  width: 100%;
+min-width: 1100px;
+  border-collapse: collapse;
+}
+
+/* Encabezados congelados */
+.table-wrapper thead th {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: #0b1120;
+}
+
+
+/* Versión CELULAR: sin scroll horizontal y columnas clave */
+/* Versión CELULAR: sin scroll horizontal y columnas clave */
+@media (max-width: 768px) {
+  .table-wrapper {
+    max-height: 60vh;
+    overflow-y: auto;
+    overflow-x: hidden;
   }
 
-  function shuffle(arr){
-    const a = arr.slice();
-    for(let i=a.length-1;i>0;i--){
-      const j = Math.floor(Math.random()*(i+1));
-      [a[i],a[j]] = [a[j],a[i]];
-    }
-    return a;
+  .table-wrapper table {
+    width: 100%;
+min-width: 100%;
+    table-layout: fixed;
   }
 
-  function validateFull(st){
-    const gks = (st.gks||[]).map(x => (x||"").trim()).filter(Boolean);
-    const players = (st.players||[]).map(x => (x||"").trim()).filter(Boolean);
-    if(gks.length !== 2) return { ok:false, msg:`Faltan porteros: ${gks.length}/2` };
-    if(players.length !== PLAYERS_COUNT) return { ok:false, msg:`Faltan jugadores: ${players.length}/${PLAYERS_COUNT}` };
-    return { ok:true };
+  .table-wrapper th,
+  .table-wrapper td {
+    font-size: 11px;
+    padding: 6px 4px;
+    word-break: break-word;
   }
 
-  function generateSorteoSlots(){
-    saveDraft();
-    const st = readState() || {};
-    const valid = validateFull(st);
-    if(!valid.ok){ showToast(valid.msg); return false; }
+  /* Ocultamos todo por defecto en móvil */
+  .table-wrapper th,
+  .table-wrapper td {
+    display: none;
+  }
+.header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
 
-    const slots = shuffle([...Array(PLAYERS_COUNT).keys()]);
-    st.sorteo = {
-      slotsEquipo1: slots.slice(0, PER_TEAM),
-      slotsEquipo2: slots.slice(PER_TEAM, PER_TEAM*2),
-      slotsEquipo3: slots.slice(PER_TEAM*2, PER_TEAM*3),
-      generatedAt: new Date().toISOString()
+.header-left {
+  display: flex;
+  align-items: center;
+}
+
+.anniversary-wrap {
+  position: absolute;
+  top: 18px;
+  right: 24px;
+}
+
+/* badge normal */
+.anniversary-badge {
+  display: inline-block;
+}
+
+/* luna FORZADA arriba */
+.theme-toggle {
+  position: absolute;
+  top: -18px;        /* 👈 LA SUBE ARRIBA DEL TEXTO */
+  right: 0;
+  background: transparent;
+  border: none;
+  color: var(--accent);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+
+  /* MOSTRAR SOLO:
+     - 1: Código
+     - 2: Descripción
+     - 3: U/M
+     - Estado (si quieres verlo, por su posición)
+     - Conteo físico: la columna marcada con .col-conteo
+  */
+
+  .table-wrapper th:nth-child(1),
+  .table-wrapper td:nth-child(1),
+  .table-wrapper th:nth-child(2),
+  .table-wrapper td:nth-child(2),
+  .table-wrapper th:nth-child(3),
+  .table-wrapper td:nth-child(3),
+  .table-wrapper th:nth-child(4),
+  .table-wrapper td:nth-child(4),
+  .table-wrapper th.col-conteo,
+  .table-wrapper td.col-conteo,
+  .table-wrapper th.col-units,
+  .table-wrapper td.col-units {
+    display: table-cell;
+  }
+
+  .table-wrapper td.col-conteo input,
+  .table-wrapper td.col-units input {
+    width: 100%;
+    font-size: 14px;
+    padding: 6px;
+  }
+.fila-total {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  font-weight: 600;
+}
+
+.total-ganancia {
+  color: #32d296;
+}
+
+.total-perdida {
+  color: #ff6b6b;
+}
+/* ===== TABLA EN MODO CLARO ===== */
+body[data-theme="light"] table {
+  background: #ffffff;
+  color: #111827;
+}
+
+body[data-theme="light"] th {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+body[data-theme="light"] td {
+  border-color: rgba(0,0,0,0.08);
+}
+
+body[data-theme="light"] tr {
+  background: transparent;
+}
+/* ===== FIX: CÓDIGOS LEGIBLES EN MODO CLARO ===== */
+body[data-theme="light"] td:first-child,
+body[data-theme="light"] .code,
+body[data-theme="light"] .codigo {
+  color: #111827 !important;
+  opacity: 1 !important;
+  font-weight: 600;
+}
+
+  </style>
+</head>
+<body data-theme="dark">
+  <!-- Splash con logo -->
+  <div id="splash">
+    <!-- 🔁 Cambia el src por la ruta real de tu logo -->
+    <img id="splash-logo" src="logo_pic.png" alt="Luquisa logo" />
+    <div id="splash-text">Preparando módulos<span id="dots">...</span></div>
+    <div id="splash-progress"><div id="splash-bar"></div></div>
+  </div>
+
+  <!-- App -->
+  <div id="app">
+    <div class="card">
+       <header class="header">
+  <div class="header-left">
+    <div class="header-main">
+      <img class="header-logo" src="logo_pic.png" alt="PIC" />
+      <div class="header-title">
+        <h1>PIC</h1>
+        <h2>Professional Inventory Control</h2>
+        <p class="header-sub">
+          Módulo de toma física de inventario · Versión 1.0.1
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="anniversary-wrap">
+  <button id="themeToggle" class="theme-toggle">🌙</button>
+   </div>
+</header>
+
+      <div class="top-controls">
+        <button id="btnLoadExcel" class="btn btn-primary">
+          📂 Cargar archivo Sage (Excel)
+        </button>
+        <button id="btnReset" class="btn btn-warning">
+          ♻️ Reiniciar conteos
+        </button>
+        <button id="btnExportExcel" class="btn btn-secondary">
+          💾 Exportar archivo actualizado
+        </button>
+        <input
+          type="file"
+          id="excelInput"
+          accept=".xlsx,.xls"
+          style="display: none"
+        />
+<span 
+  id="contadorProgreso"
+  style="margin-left:12px; font-size:12px; color:#9ca3af;"
+>
+  0 de 0 productos contados
+</span>
+<label style="margin-left:12px; font-size:12px; color:#9ca3af;">
+  Por:
+  <input
+    type="text"
+    id="nombreInspector"
+    placeholder="Nombre del responsable"
+    style="margin-left:6px; padding:3px 8px; border-radius:12px; border:1px solid #555; font-size:12px; background:transparent; color:#fff; width:180px;"
+  />
+</label>
+
+      </div>
+
+      <!-- Rango de fechas -->
+      <div class="date-range">
+        <span>Período de inventario:</span>
+        <label for="dateFrom">Desde:</label>
+        <input type="date" id="dateFrom" />
+        <label for="dateTo">Hasta:</label>
+        <input type="date" id="dateTo" />
+      </div>
+
+      <!-- Filtros -->
+      <div class="filters-row">
+        <label for="filterMarca">Marca:</label>
+        <select id="filterMarca">
+          <option value="__ALL__">Todas</option>
+        </select>
+
+        <label for="filterEsp">Especialidad:</label>
+        <select id="filterEsp">
+          <option value="__ALL__">Todas</option>
+        </select>
+
+        <input
+          type="text"
+          id="searchCajas"
+          class="search-input"
+          placeholder="Buscar por código o descripción"
+        />
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="tabCajas">
+          Inventario en cajas
+        </button>
+        <button class="tab-btn" data-tab="tabSueltas">
+          Unidades sueltas
+        </button>
+  <button class="tab-btn" data-tab="tabResumen">
+    Resumen ejecutivo
+  </button>
+      </div>
+
+      <!-- Paneles -->
+      <div id="tabCajas" class="tab-panel active">
+        <div class="table-wrapper">
+          <table>
+<thead>
+  <tr>
+    <th>Código</th>
+    <th>Descripción</th>
+    <th>U/M</th>
+    <th>Sistema</th>
+    <th class="col-conteo">Conteo físico</th>
+    <th>  Unidades</th>
+    <th>  Diferencia</th>
+    <th>  Estado</th>
+  </tr>
+</thead>
+            
+            <tbody id="tbodyCajas"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="tabSueltas" class="tab-panel">
+  <div class="filters-row" style="margin-top: 0.25rem;">
+    <input
+      type="text"
+      id="searchSueltas"
+      class="search-input"
+      placeholder="Buscar por código o descripción (sueltas)"
+    />
+  </div>
+
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Descripción</th>
+          <th>Unid. sueltas</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody id="tbodySueltas"></tbody>
+    </table>
+  </div>
+</div>
+
+<div id="tabResumen" class="tab-panel">
+
+    <h2>Resumen Ejecutivo</h2>
+
+    <div style="margin-bottom: 1rem;">
+        <input 
+            type="password" 
+            id="passResumen" 
+            placeholder="Contraseña Resumen Ejecutivo" 
+            style="padding: 6px; width: 220px;"
+        />
+        <button id="btnAccederResumen" class="btn-primary" type="button">
+            Acceder
+        </button>
+    </div>
+
+    <section id="resumenEjecutivo" style="display:none;"></section>
+
+    <div style="margin-top: 1rem; text-align: right;">
+        <button
+            id="btnExportResumen"
+            class="btn-primary"
+            type="button"
+        >
+            Exportar resumen a Excel
+        </button>
+    </div>
+</div>
+
+  <!-- Librería Excel -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+ 
+  <script>
+    // ---------- CONFIGURACIÓN SAGE ----------
+
+    const passwordResumen = "RM2025";
+
+    document
+      .getElementById("btnAccederResumen")
+      .addEventListener("click", () => {
+        const passIngresada = document
+          .getElementById("passResumen")
+          .value.trim();
+
+        if (passIngresada === passwordResumen) {
+          document.getElementById("resumenEjecutivo").style.display = "block";
+          alert("Acceso concedido al Resumen Ejecutivo.");
+        } else {
+          alert("Contraseña incorrecta.");
+        }
+      });
+
+    const SAGE_CONFIG = {
+      colCodigo: "Item ID",
+      colDescripcion: "Description for Sales",
+      colUnidad: "Stocking U/M",
+      colMarca: "Item Type",
+      colSistema: "Qty on Hand",
+      colCuentaFisica: "Cuenta Fisica",
+      colDiferencia: "Diferencia",
+      colCosto: "Last Unit Cost",
+      colEspecialidad: "Location",
     };
-    writeState(st);
-    showToast("Equipos generados ✅");
-    renderEquipos();
-    return true;
-  }
 
-  function escapeHtml(s){
-    return String(s)
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;")
-      .replaceAll('"',"&quot;")
-      .replaceAll("'","&#039;");
-  }
+    const SAGE_PATTERNS = {
+      colCodigo: ["item id", "codigo", "code"],
+      colDescripcion: ["description for sales", "description", "descripcion"],
+      colUnidad: ["stocking", "u/m", "unidad"],
+      colMarca: ["item type", "marca", "brand"],
+      colSistema: ["qty on hand", "existencia"],
+      colCuentaFisica: ["cuenta fisica", "conteo fisico", "physical count"],
+      colDiferencia: ["diferencia", "difference", "variance"],
+      colCosto: ["last unit cost", "unit cost", "ultimo costo"],
+      colEspecialidad: ["location", "locacion", "ubicacion"],
+    };
 
-  function renderListFromSlots(container, slots, players){
-    container.innerHTML = "";
-    slots.forEach((slotIndex, idx) => {
-      const name = players[slotIndex] || "";
-      const div = document.createElement("div");
-      div.className = "item";
-      div.innerHTML = `<span>${idx+1}) ${escapeHtml(name || "(vacío)")}</span>`;
-      container.appendChild(div);
+    const SUPERVISOR_PIN = "2025"; // 🔁 Cambia la clave si deseas
+
+    // Estado global
+    let H = {};
+    let sageHeaders = [];
+    let sageRows = [];              // filas originales Sage (como objetos)
+    let inventoryCajas = [];        // lo que ves en la tabla
+    let sageIndexByCodigo = new Map(); // código -> índice en sageRows
+
+    // ---------- Normalizador de encabezados ----------
+    function normalizeHeader(h) {
+      return (
+        String(h || "")
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "") // quita tildes
+          .replace(/[\[\]\(\):]/g, " ")
+          .replace(/\s+/g, " ")
+          .trim()
+          .toLowerCase() || String(h || "")
+      );
+    }
+
+   // ---------- Splash con mensajes secuenciales ----------
+const splash = document.getElementById("splash");
+const splashText = document.getElementById("splash-text");
+const dotsSpan = document.getElementById("dots");
+const app = document.getElementById("app");
+
+// Animación de puntos "..."
+let dotCount = 1;
+const dotsInterval = setInterval(() => {
+  dotCount = (dotCount % 3) + 1;
+  dotsSpan.textContent = ".".repeat(dotCount);
+}, 500);
+
+// Mensajes secuenciales
+const mensajes = [
+  "Preparando módulos",
+  "Inicializando interfaz",
+  "Cargando elementos"
+];
+
+let paso = 0;
+
+function cambiarMensaje() {
+  splashText.childNodes[0].textContent = mensajes[paso];
+  paso++;
+
+  if (paso < mensajes.length) {
+    setTimeout(cambiarMensaje, 1500); // 1.5s por mensaje
+  } else {
+    // último mensaje → cerrar splash
+    setTimeout(() => {
+      clearInterval(dotsInterval);
+      splash.style.opacity = "0";
+      setTimeout(() => {
+        splash.style.display = "none";
+        app.style.display = "block";
+      }, 400);
+    }, 1500);
+  }
+}
+
+// iniciar secuencia
+setTimeout(cambiarMensaje, 300); 
+
+    // ---------- Tabs ----------
+    const tabButtons = document.querySelectorAll(".tab-btn");
+    const tabPanels = document.querySelectorAll(".tab-panel");
+    tabButtons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const target = btn.dataset.tab;
+        tabButtons.forEach((b) => b.classList.remove("active"));
+        tabPanels.forEach((p) => p.classList.remove("active"));
+        btn.classList.add("active");
+        document.getElementById(target).classList.add("active");
+      });
     });
+
+    // ---------- DOM ----------
+    const btnLoadExcel = document.getElementById("btnLoadExcel");
+    const btnReset = document.getElementById("btnReset");
+    const btnExportExcel = document.getElementById("btnExportExcel");
+    const btnExportResumen = document.getElementById("btnExportResumen");
+    const excelInput = document.getElementById("excelInput");
+    const tbodyCajas = document.getElementById("tbodyCajas");
+    const tbodySueltas = document.getElementById("tbodySueltas");
+    const searchCajas = document.getElementById("searchCajas");
+    const searchSueltas = document.getElementById("searchSueltas");
+    const filterMarca = document.getElementById("filterMarca");
+    const filterEsp = document.getElementById("filterEsp");
+    const dateFrom = document.getElementById("dateFrom");
+    const dateTo = document.getElementById("dateTo");
+
+    // Fechas por defecto (1er día del mes a hoy)
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, "0");
+    const dd = String(today.getDate()).padStart(2, "0");
+    dateTo.value = `${yyyy}-${mm}-${dd}`;
+    dateFrom.value = `${yyyy}-${mm}-01`;
+
+    // ---------- Buscar fila de encabezados ----------
+    function findHeaderRowIndex(aoa) {
+      let bestIndex = 0;
+      let bestScore = -1;
+
+      for (let i = 0; i < aoa.length; i++) {
+        const row = aoa[i];
+        const cells = row.map((c) => normalizeHeader(c));
+        let score = 0;
+
+        for (const patterns of Object.values(SAGE_PATTERNS)) {
+          for (const cell of cells) {
+            for (const p of patterns) {
+              if (p && cell.includes(p)) {
+                score++;
+                break;
+              }
+            }
+          }
+        }
+        if (score > bestScore) {
+          bestScore = score;
+          bestIndex = i;
+        }
+      }
+      return bestIndex;
+    }
+
+    // ---------- Resolver columnas por nombre ----------
+    function resolveSageColumns() {
+      H = {};
+      const normMap = {};
+      sageHeaders.forEach((h) => {
+        normMap[h] = normalizeHeader(h);
+      });
+
+      Object.entries(SAGE_PATTERNS).forEach(([key, patterns]) => {
+        let foundOriginal = null;
+
+        outer: for (const [original, norm] of Object.entries(normMap)) {
+          for (const pattern of patterns) {
+            if (pattern && norm.includes(pattern)) {
+              foundOriginal = original;
+              break outer;
+            }
+          }
+        }
+        H[key] = foundOriginal || null;
+      });
+
+      const criticalKeys = [
+        "colCodigo",
+        "colDescripcion",
+        "colUnidad",
+        "colMarca",
+        "colSistema",
+      ];
+      const missingCritical = [];
+      criticalKeys.forEach((key) => {
+        if (!H[key]) {
+          missingCritical.push(SAGE_CONFIG[key] || key);
+        }
+      });
+
+      if (missingCritical.length) {
+        alert(
+          "Atención: faltan columnas CRÍTICAS en el Excel:\n\n" +
+            missingCritical.join("\n") +
+            "\n\nLa tabla puede quedar incompleta. Revisa el archivo."
+        );
+      }
+    }
+
+    // ---------- Botón cargar ----------
+    btnLoadExcel.addEventListener("click", () => {
+      excelInput.click();
+    });
+
+    excelInput.addEventListener("change", (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: "array" });
+        const firstSheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[firstSheetName];
+
+        const aoa = XLSX.utils.sheet_to_json(sheet, {
+          header: 1,
+          defval: "",
+        });
+        if (!aoa.length) {
+          alert("El archivo está vacío.");
+          return;
+        }
+
+        const headerRowIndex = findHeaderRowIndex(aoa);
+        sageHeaders = aoa[headerRowIndex].map((c) => String(c));
+        H.colCosto = sageHeaders.find(
+          (h) => String(h).trim() === "Last Unit Cost"
+        );
+
+        sageRows = [];
+        sageIndexByCodigo.clear();
+
+        alert(
+          "Fila de encabezados detectada: " +
+            (headerRowIndex + 1) +
+            "\n\nEncabezados:\n" +
+            sageHeaders.join(" | ")
+        );
+
+        resolveSageColumns();
+
+        // Construimos sageRows como OBJETOS con todas las columnas
+        for (let i = headerRowIndex + 1; i < aoa.length; i++) {
+          const rowArr = aoa[i];
+          if (rowArr.every((cell) => String(cell).trim() === "")) continue;
+          const obj = {};
+          sageHeaders.forEach((h, idx) => {
+            obj[h] = rowArr[idx];
+          });
+          const idx = sageRows.length;
+          sageRows.push(obj);
+
+          // Llenar mapa código -> índice
+          if (H.colCodigo) {
+            const codigo = obj[H.colCodigo];
+            if (codigo !== undefined && codigo !== null && codigo !== "") {
+              sageIndexByCodigo.set(String(codigo), idx);
+            }
+          }
+        }
+
+        // Construimos inventoryCajas con datos relevantes
+        // 1) Guardar conteos anteriores si ya existían
+const prevByCode = new Map();
+
+if (Array.isArray(inventoryCajas)) {
+  inventoryCajas.forEach((it) => {
+    if (it && it.codigo) {
+      prevByCode.set(String(it.codigo), it);
+    }
+  });
+}
+
+// 2) Construir nueva lista PERO preservando conteos previos
+inventoryCajas = sageRows.map((row, index) => {
+  const codigo =
+    H.colCodigo && row[H.colCodigo] != null ? String(row[H.colCodigo]) : "";
+
+  const descripcion =
+    H.colDescripcion && row[H.colDescripcion] != null
+      ? String(row[H.colDescripcion])
+      : "";
+
+  const unidad =
+    H.colUnidad && row[H.colUnidad] != null
+      ? String(row[H.colUnidad])
+      : "";
+
+  const marca =
+    H.colMarca && row[H.colMarca] != null ? String(row[H.colMarca]) : "";
+
+  const sistema =
+    H.colSistema && row[H.colSistema] != null
+      ? Number(row[H.colSistema]) || 0
+      : 0;
+
+  const costo =
+    H.colCosto && row[H.colCosto] != null
+      ? Number(row[H.colCosto]) || 0
+      : 0;
+
+  // Valores por defecto
+  let fisicoCajas = null;
+  let fisicoUnidades = null;
+
+  // Si ya había datos guardados para este código → se preservan
+  const prev = prevByCode.get(codigo);
+  if (prev) {
+    fisicoCajas = prev.fisicoCajas ?? null;
+    fisicoUnidades = prev.fisicoUnidades ?? null;
   }
 
-  function renderEquipos(){
-    const st = readState() || {};
-    const sorteo = st.sorteo;
+  return {
+    codigo,
+    descripcion,
+    unidad,
+    marca,
+    sistema,
+    fisicoCajas,
+    fisicoUnidades,
+    lockCajas: false,
+    lockUnidades: false,
+    costo,
+    diff: 0,
+    estado: "PENDIENTE",
+    index,
+  };
+});
 
-    const gks = st.gks || ["",""];
-    gkName1.textContent = gks[0] ? gks[0] : "(vacío)";
-    gkName2.textContent = gks[1] ? gks[1] : "(vacío)";
 
-    if(!sorteo){
-      equiposMeta.textContent = "Aún no hay sorteo (usa ‘Sortear Equipos’)";
-      list1.innerHTML = list2.innerHTML = list3.innerHTML = "";
-      tag1.textContent = tag2.textContent = tag3.textContent = PER_TEAM;
+        renderTableCajas();
+        renderTableSueltas();
+        actualizarProgreso();
+        populateFilters();
+
+        alert(
+          "Se cargaron " +
+            inventoryCajas.length +
+            " productos desde el archivo de Sage."
+        );
+      };
+
+      reader.readAsArrayBuffer(file);
+    });
+
+    function actualizarProgreso() {
+      const tbody = document.getElementById("tbodyCajas");
+      const contadorProgresoEl =
+        document.getElementById("contadorProgreso");
+
+      if (!tbody || !contadorProgresoEl) return;
+
+      const filas = tbody.querySelectorAll("tr");
+      const total = filas.length;
+      let contados = 0;
+
+      filas.forEach((tr) => {
+        const inputs = tr.querySelectorAll("input");
+        let tieneValor = false;
+
+        inputs.forEach((inp) => {
+          if (
+            inp.value !== "" &&
+            inp.value !== null &&
+            inp.value !== undefined
+          ) {
+            tieneValor = true;
+          }
+        });
+
+        if (tieneValor) {
+          contados++;
+        }
+      });
+
+      contadorProgresoEl.textContent =
+        contados + " de " + total + " productos contados";
+      renderResumenEjecutivo();
+    }
+
+    // ---------- Filtros ----------
+    function populateFilters() {
+      const marcas = new Set();
+      const especialidades = new Set(["Varios"]);
+
+      inventoryCajas.forEach((item) => {
+        if (item.marca) marcas.add(item.marca);
+        if (item.especialidad) especialidades.add(item.especialidad);
+      });
+
+      filterMarca.innerHTML = '<option value="__ALL__">Todas</option>';
+      marcas.forEach((m) => {
+        const opt = document.createElement("option");
+        opt.value = m;
+        opt.textContent = m;
+        filterMarca.appendChild(opt);
+      });
+
+      filterEsp.innerHTML = '<option value="__ALL__">Todas</option>';
+      especialidades.forEach((e) => {
+        const opt = document.createElement("option");
+        opt.value = e;
+        opt.textContent = e;
+        filterEsp.appendChild(opt);
+      });
+    }
+
+    filterMarca.addEventListener("change", () => {
+      renderTableCajas();
+      renderTableSueltas();
+    });
+    filterEsp.addEventListener("change", () => {
+      renderTableCajas();
+      renderTableSueltas();
+    });
+
+    searchCajas.addEventListener("input", renderTableCajas);
+    searchSueltas.addEventListener("input", renderTableSueltas);
+
+    // ---------- Diferencias ----------
+    function calculateDiff(sistema, fisico) {
+      if (fisico === null || fisico === undefined || fisico === "") return null;
+      return sistema - fisico;
+    }
+    function formatDiff(diff) {
+      if (diff === null) return "–";
+      if (diff === 0) return "0";
+      return diff.toString();
+    }
+    function diffClass(diff) {
+      if (diff === null) return "num-neutral";
+      if (diff === 0) return "num-neutral";
+      if (diff > 0) return "num-positive";
+      return "num-negative";
+    }
+    function applyStatusStyle(el, diff) {
+      el.className = "status-pill";
+      if (diff === null) {
+        el.textContent = "Pendiente";
+        el.classList.add("status-warn");
+        return;
+      }
+      if (diff === 0) {
+        el.textContent = "OK";
+        el.classList.add("status-ok");
+      } else if (Math.abs(diff) <= 2) {
+        el.textContent = "Revisar";
+        el.classList.add("status-warn");
+      } else {
+        el.textContent = "Alerta";
+        el.classList.add("status-alert");
+      }
+    }
+
+    // ---------- Render tablas ----------
+    function renderTableCajas() {
+      tbodyCajas.innerHTML = "";
+      const texto = (searchCajas.value || "").toLowerCase();
+      const fMarca = filterMarca.value;
+      const fEsp = filterEsp.value;
+
+      inventoryCajas.forEach((item, index) => {
+        if (!item.codigo && !item.descripcion) return;
+  
+        const hayFiltro = texto.length > 0;
+        const coincideTexto =
+          !hayFiltro ||
+          item.codigo.toLowerCase().includes(texto) ||
+          item.descripcion.toLowerCase().includes(texto);
+        if (!coincideTexto) return;
+
+        if (fMarca !== "__ALL__" && item.marca !== fMarca) return;
+        if (fEsp !== "__ALL__" && item.especialidad !== fEsp) return;
+
+        const tr = document.createElement("tr");
+
+        const tdCodigo = document.createElement("td");
+        tdCodigo.className = "col-codigo";
+        tdCodigo.textContent = item.codigo;
+        tr.appendChild(tdCodigo);
+
+        const tdDesc = document.createElement("td");
+        tdDesc.className = "col-descripcion";
+        tdDesc.textContent = item.descripcion;
+        tr.appendChild(tdDesc);
+
+        const tdUM = document.createElement("td");
+        tdUM.className = "col-um";
+        tdUM.textContent = item.unidad || "";
+        tr.appendChild(tdUM);
+
+        const tdSistema = document.createElement("td");
+        tdSistema.className = "col-num";
+
+        if (
+          item.sistema === "" ||
+          item.sistema === null ||
+          item.sistema === undefined ||
+          Number.isNaN(item.sistema)
+        ) {
+          tdSistema.textContent = "";
+        } else {
+          tdSistema.textContent = item.sistema;
+        }
+
+        tr.appendChild(tdSistema);
+
+        const tdFisico = document.createElement("td");
+        tdFisico.className = "col-input col-conteo";
+
+        const inputCajas = document.createElement("input");
+        inputCajas.type = "number";
+        inputCajas.min = "0";
+        inputCajas.step = "1";
+        inputCajas.className = "input-count";
+        inputCajas.value =
+          item.fisicoCajas != null ? item.fisicoCajas : "";
+        inputCajas.dataset.index = index.toString();
+
+        tdFisico.appendChild(inputCajas);
+        tr.appendChild(tdFisico);
+
+        const tdUnid = document.createElement("td");
+        tdUnid.className = "col-units";
+        const inputUnid = document.createElement("input");
+        inputUnid.type = "number";
+        inputUnid.min = "0";
+        inputUnid.step = "1";
+        inputUnid.className = "input-count";
+        inputUnid.value =
+          item.fisicoUnidades !== null &&
+          item.fisicoUnidades !== undefined
+            ? item.fisicoUnidades
+            : "";
+        inputUnid.dataset.index = index.toString();
+        inputUnid.dataset.field = "unidades";
+        tdUnid.appendChild(inputUnid);
+        tr.appendChild(tdUnid);
+
+        const tdDiff = document.createElement("td");
+        const diff = calculateDiff(item.sistema, item.fisicoCajas);
+        tdDiff.textContent = formatDiff(diff);
+        tdDiff.className = "col-diff " + diffClass(diff);
+        tr.appendChild(tdDiff);
+
+        const tdStatus = document.createElement("td");
+        const statusSpan = document.createElement("span");
+        applyStatusStyle(statusSpan, diff);
+        tdStatus.appendChild(statusSpan);
+        tr.appendChild(tdStatus);
+
+        inputCajas.onblur = () => {
+          handleCountChange(index, "cajas", inputCajas, tdDiff, statusSpan);
+          renderTablaSueltas();
+
+        };
+
+        inputUnid.onblur = () => {
+          handleCountChange(index, "unidades", inputUnid, tdDiff, statusSpan);
+        };
+
+        tbodyCajas.appendChild(tr);
+      });
+    }
+
+    function renderTableSueltas() {
+      tbodySueltas.innerHTML = "";
+      const texto = (searchSueltas.value || "").toLowerCase();
+      const fMarca = filterMarca.value;
+      const fEsp = filterEsp.value;
+
+      inventoryCajas.forEach((item) => {
+        if (!item.codigo && !item.descripcion) return;
+
+        const hayFiltro = texto.length > 0;
+        const coincideTexto =
+          !hayFiltro ||
+          item.codigo.toLowerCase().includes(texto) ||
+          item.descripcion.toLowerCase().includes(texto);
+        if (!coincideTexto) return;
+
+        if (fMarca !== "__ALL__" && item.marca !== fMarca) return;
+        if (fEsp !== "__ALL__" && item.especialidad !== fEsp) return;
+
+        const tr = document.createElement("tr");
+
+        const tdCodigo = document.createElement("td");
+        tdCodigo.className = "col-codigo";
+        tdCodigo.textContent = item.codigo;
+        tr.appendChild(tdCodigo);
+
+        const tdDesc = document.createElement("td");
+        tdDesc.className = "col-descripcion";
+        tdDesc.textContent = item.descripcion;
+        tr.appendChild(tdDesc);
+
+        const tdUnid = document.createElement("td");
+        tdUnid.className = "col-units";
+        tdUnid.textContent =
+          item.fisicoUnidades !== null &&
+          item.fisicoUnidades !== undefined
+            ? item.fisicoUnidades
+            : "";
+        tr.appendChild(tdUnid);
+
+        const tdStatus = document.createElement("td");
+        const statusSpan = document.createElement("span");
+        statusSpan.className = "status-pill";
+
+        if (item.fisicoUnidades && item.fisicoUnidades > 0) {
+          statusSpan.textContent = "Con sueltas";
+          statusSpan.classList.add("status-warn");
+        } else {
+          statusSpan.textContent = "Sin sueltas";
+          statusSpan.classList.add("status-ok");
+        }
+
+        tdStatus.appendChild(statusSpan);
+        tr.appendChild(tdStatus);
+
+        tbodySueltas.appendChild(tr);
+      });
+    }
+
+    function handleCountChange(index, tipo, inputEl, tdDiff, statusSpan) {
+      const item = inventoryCajas[index];
+
+      const nuevoValor =
+        inputEl.value === "" ? null : Number(inputEl.value);
+
+      if (tipo === "cajas") {
+        item.fisicoCajas = nuevoValor;
+      } else {
+        item.fisicoUnidades = nuevoValor;
+      }
+
+      const diff = calculateDiff(item.sistema, item.fisicoCajas);
+      tdDiff.textContent = formatDiff(diff);
+      tdDiff.className = "col-diff " + diffClass(diff);
+
+      applyStatusStyle(statusSpan, diff);
+
+      // Sincronizar con filas originales Sage
+      syncWithSage(item);
+
+      actualizarProgreso();
+      guardarEstadoPIC();
+      renderTableSueltas();
+    }
+
+    // Sincronizar objeto de la tabla con fila original de Sage
+    function syncWithSage(item) {
+      if (!H.colCodigo) return;
+      const idx = sageIndexByCodigo.get(item.codigo);
+      if (idx === undefined) return;
+
+      const row = sageRows[idx];
+      const diff = calculateDiff(item.sistema, item.fisicoCajas);
+
+      if (H.colCuentaFisica) {
+        row[H.colCuentaFisica] =
+          item.fisicoCajas === null || item.fisicoCajas === undefined
+            ? ""
+            : item.fisicoCajas;
+      }
+      if (H.colDiferencia) {
+        row[H.colDiferencia] =
+          diff === null || diff === undefined ? "" : diff;
+      }
+    }
+
+    // ----------- Botón Reiniciar -----------
+    btnReset.addEventListener("click", () => {
+      if (!inventoryCajas.length) {
+        alert("Primero carga un archivo de Sage.");
+        return;
+      }
+
+      const ok = confirm(
+        "¿Seguro que deseas reiniciar TODOS los conteos físicos?\nEsta acción no se puede deshacer."
+      );
+      if (!ok) return;
+
+      localStorage.removeItem("PIC_ESTADO");
+
+      inventoryCajas.forEach((item) => {
+        item.fisicoCajas = null;
+        item.fisicoUnidades = null;
+        item.lockCajas = false;
+        item.lockUnidades = false;
+      });
+
+      sageRows.forEach((row) => {
+        if (H.colCuentaFisica) row[H.colCuentaFisica] = "";
+        if (H.colDiferencia) row[H.colDiferencia] = "";
+      });
+
+      renderTableCajas();
+      renderTableSueltas();
+      actualizarProgreso();
+    });
+
+    // ---------- Botón Exportar (actualiza SOLO el archivo Sage) ----------
+btnExportExcel.addEventListener("click", () => {
+  try {
+    // 1) Verificar que haya inventario cargado
+    if (!Array.isArray(inventoryCajas) || !inventoryCajas.length) {
+      alert("Primero carga un archivo de Sage.");
       return;
     }
 
-    const when = new Date(sorteo.generatedAt);
-    equiposMeta.textContent = `Generado: ${when.toLocaleString()}`;
-
-    const players = st.players || Array(PLAYERS_COUNT).fill("");
-    renderListFromSlots(list1, sorteo.slotsEquipo1 || [], players);
-    renderListFromSlots(list2, sorteo.slotsEquipo2 || [], players);
-    renderListFromSlots(list3, sorteo.slotsEquipo3 || [], players);
-
-    tag1.textContent = (sorteo.slotsEquipo1||[]).length;
-    tag2.textContent = (sorteo.slotsEquipo2||[]).length;
-    tag3.textContent = (sorteo.slotsEquipo3||[]).length;
-
-    applyKitDot(kitDot1, kit1?.value);
-    applyKitDot(kitDot2, kit2?.value);
-    applyKitDot(kitDot3, kit3?.value);
-  }
-
-  function resetAll(){
-    const ok = confirm("¿Tay seguro que vas a volar la lista?\n\nBueno pues, cuidao.");
-    if(!ok) return;
-    localStorage.removeItem(LS_KEY);
-    location.reload();
-  }
-
-  function prettyDate(yyyyMMdd){
-    if(!yyyyMMdd) return "";
-    const [y,m,d] = yyyyMMdd.split("-").map(Number);
-    const dt = new Date(y, m-1, d);
-    return dt.toLocaleDateString("es-PA", { weekday:"long", day:"numeric", month:"long", year:"numeric" });
-  }
-  function prettyTime(hhmm){
-    if(!hhmm) return "";
-    const [h,mi] = hhmm.split(":").map(Number);
-    const dt = new Date(2000,0,1,h,mi);
-    return dt.toLocaleTimeString("es-PA", { hour:"numeric", minute:"2-digit" });
-  }
-  function kitEmoji(color){
-    const map = { red:"🔴", blue:"🔵", yellow:"🟡", white:"⚪", black:"⚫" };
-    return map[color] ? map[color] + " " : "";
-  }
-
-  function buildExportText(){
-    const st = readState() || {};
-    const rawDate = (st.match?.date || "").trim();
-    const rawTime = (st.match?.time || "").trim();
-    const header = `${prettyDate(rawDate)} – ${prettyTime(rawTime)}`;
-
-    const gks = st.gks || ["",""];
-    const p1 = gks[0] ? gks[0] : "(vacío)";
-    const p2 = gks[1] ? gks[1] : "(vacío)";
-
-    const sorteo = st.sorteo;
-    const players = st.players || Array(PLAYERS_COUNT).fill("");
-
-    const kits = st.kits || {};
-    const e1 = kitEmoji(kits.team1);
-    const e2 = kitEmoji(kits.team2);
-    const e3 = kitEmoji(kits.team3);
-
-    if(!sorteo){
-      return `${header}\nPorteros:\n🧤 ${p1}\n🧤 ${p2}\n\n(Sin sorteo aún)`;
+    // 2) Verificar que Sage está en memoria (encabezados + filas)
+    if (
+      !Array.isArray(sageHeaders) || !sageHeaders.length ||
+      !Array.isArray(sageRows)    || !sageRows.length
+    ) {
+      alert("No hay datos de Sage cargados.");
+      return;
     }
 
-    const teamLines = (slots) => slots.map((idx) => players[idx] ? players[idx] : "(vacío)").join("\n");
-    const t1 = teamLines(sorteo.slotsEquipo1 || []);
-    const t2 = teamLines(sorteo.slotsEquipo2 || []);
-    const t3 = teamLines(sorteo.slotsEquipo3 || []);
-
-    return [
-      header,
-      "Porteros:",
-      `🧤 ${p1}`,
-      `🧤 ${p2}`,
-      "",
-      `${e1}Equipo 1`,
-      t1,
-      "",
-      `${e2}Equipo 2`,
-      t2,
-      "",
-      `${e3}Equipo 3`,
-      t3
-    ].join("\n");
-  }
-
-  // ---- COBRO ----
-  function ensureCobroState(st){
-    if(typeof st.fee !== "number") st.fee = 0;
-    if(!Array.isArray(st.payments) || st.payments.length !== COBRO_COUNT){
-      st.payments = Array(COBRO_COUNT).fill(null).map(()=>({cash:0, yappy:0}));
+    const inputNombre = document.getElementById("nombreInspector");
+    if (!inputNombre) {
+      alert("No se encontró el campo del responsable.");
+      return;
     }
-    return st;
+
+    let nombrePersona = inputNombre.value.trim();
+    if (!nombrePersona) {
+      alert("Escribe el nombre del responsable.");
+      return;
+    }
+
+    // limpiar nombre de archivo
+    nombrePersona = nombrePersona.replace(/[\\\/:*?"<>|]/g, "_");
+
+    // 3) Actualizar SOLO "Cuenta física" y "Diferencia" en sageRows
+    inventoryCajas.forEach((item, index) => {
+      const row = sageRows[index];
+      if (!row) return;
+
+      // Conteo físico
+      if (H.colCuentaFisica) {
+        row[H.colCuentaFisica] =
+          item.fisicoCajas === null || item.fisicoCajas === undefined
+            ? ""
+            : item.fisicoCajas;
+      }
+
+      // Diferencia
+      if (H.colDiferencia) {
+        const sisRaw = item.sistema;
+        const fisRaw = item.fisicoCajas;
+
+        let diff = "";
+        if (
+          sisRaw !== "" && sisRaw !== null && sisRaw !== undefined &&
+          fisRaw !== "" && fisRaw !== null && fisRaw !== undefined
+        ) {
+          const sis = Number(sisRaw);
+          const fis = Number(fisRaw);
+          if (Number.isFinite(sis) && Number.isFinite(fis)) {
+            diff = sis - fis;
+          }
+        }
+
+        row[H.colDiferencia] = diff === "" ? "" : diff;
+      }
+    });
+
+        // 4) Construir la matriz AoA a partir de sageHeaders + sageRows   
+    const aoa = [];
+
+    // Encabezados originales + nueva columna
+    const headersExport = [...sageHeaders, "Unidades sueltas"];
+    aoa.push(headersExport);
+
+    // Filas
+    sageRows.forEach((rowObj, index) => {
+      // Datos originales en el mismo orden
+      const rowArr = sageHeaders.map((h) =>
+        rowObj[h] !== undefined && rowObj[h] !== null ? rowObj[h] : ""
+      );
+    
+      const item = inventoryCajas[index];
+      const sueltas =
+        item && item.fisicoUnidades != null ? item.fisicoUnidades : "";
+
+      // Agregar como última columna
+      rowArr.push(sueltas);
+
+      aoa.push(rowArr);
+    });
+
+
+    // 5) Crear y descargar el Excel
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Sage");
+
+    XLSX.writeFile(wb, `PIC_Sage_${nombrePersona}.xlsx`);
+  } catch (err) {
+    console.error(err);
+    alert("Error exportando el archivo Sage: " + err.message);
   }
-  function n2(v){ const x = parseFloat(v); return Number.isFinite(x) ? x : 0; }
-  function fmt2(v){ return (Math.round(v*100)/100).toFixed(2); }
+});
 
-  function getCobroNames(st){
-    const gks = st.gks || ["",""];
-    const players18 = st.players || Array(PLAYERS_COUNT).fill("");
-    const all = [
-      (gks[0] || "").trim(),
-      (gks[1] || "").trim(),
-      ...players18.map(x => (x||"").trim())
-    ];
-    while(all.length < COBRO_COUNT) all.push("");
-    return all.slice(0, COBRO_COUNT);
+
+    // ====== SEGURIDAD SOLO AL EDITAR UN VALOR ======
+    let valorAnteriorConteo = "";
+
+    document.addEventListener("focusin", function (e) {
+      if (!e.target.classList.contains("input-count")) return;
+      valorAnteriorConteo = e.target.value || "";
+    });
+
+    document.addEventListener("change", function (e) {
+      if (!e.target.classList.contains("input-count")) return;
+
+      const nuevoValor = e.target.value || "";
+
+      if (valorAnteriorConteo === "" && nuevoValor !== "") {
+        return;
+      }
+
+      if (valorAnteriorConteo === nuevoValor) {
+        return;
+      }
+
+      const pass = prompt(
+        "Ingrese la contraseña para modificar un conteo:"
+      );
+
+      if (pass !== SUPERVISOR_PIN) {
+        e.target.value = valorAnteriorConteo;
+      }
+    });
+  </script>
+
+<script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("/sw.js")
+      .catch(function (err) {
+        console.error("Error registrando el service worker", err);
+      });
   }
 
-  function renderCobro(){
-    let st = readState() || {};
-    st = ensureCobroState(st);
-    writeState(st);
+function guardarEstadoPIC() {
+  const estado = {
+    cajas: inventoryCajas,
+    responsable: document.getElementById("nombreInspector")?.value || ""
+  };
 
-    const feeInput = $("feeInput");
-    const tbody = $("payTbody");
-    const totalEl = $("totalSaldo");
-    if(!feeInput || !tbody || !totalEl) return;
+  localStorage.setItem("PIC_ESTADO", JSON.stringify(estado));
+}
 
-    feeInput.value = fmt2(n2(st.fee));
-    const names = getCobroNames(st);
+function cargarEstadoPIC() {
+  const data = localStorage.getItem("PIC_ESTADO");
+  if (!data) return;
 
-    tbody.innerHTML = names.map((name, i) => {
-      const p = st.payments[i] || {cash:0, yappy:0};
-      return `
-        <tr data-i="${i}">
-          <td>${i+1}</td>
-          <td>${name || "(vacío)"}</td>
-          <td><input class="pay-in" type="number" inputmode="decimal" min="0" step="0.01" data-k="cash"  value="${fmt2(n2(p.cash))}"></td>
-          <td><input class="pay-in" type="number" inputmode="decimal" min="0" step="0.01" data-k="yappy" value="${fmt2(n2(p.yappy))}"></td>
-          <td class="saldo-cell" data-saldo>0.00</td>
+  const estado = JSON.parse(data);
+
+    if (estado.sageAoA && Array.isArray(estado.sageAoA)) {
+    sageAoA = estado.sageAoA;
+    sageHeaders = sageAoA[0].map(c => String(c));
+
+    idxCuentaFisica = typeof estado.idxCuentaFisica === "number"
+      ? estado.idxCuentaFisica
+      : -1;
+
+    idxDiferencia = typeof estado.idxDiferencia === "number"
+      ? estado.idxDiferencia
+      : -1;
+
+    sageCargado = true;
+    guardarEstadoPIC(); 
+  }
+
+  if (estado.cajas && Array.isArray(estado.cajas)) {
+    inventoryCajas = estado.cajas;
+    renderTableCajas();
+    renderTableSueltas();
+  }
+
+  if (estado.responsable && document.getElementById("nombreInspector")) {
+    document.getElementById("nombreInspector").value = estado.responsable;
+  }
+
+  actualizarProgreso();
+}
+
+
+document.addEventListener("input", function (e) {
+  if (e.target.classList.contains("input-count")) {
+    guardarEstadoPIC();
+  }
+});
+
+window.addEventListener("load", function () {
+  cargarEstadoPIC();
+});
+
+function getEstadoFromDiff(diff) {
+  if (diff === 0) return "OK";
+  if (Math.abs(diff) <= 2) return "REVISAR";
+  return "ALERTA";
+}
+
+// --------- Cálculo del resumen ---------
+function calcularResumenEjecutivo() {
+  const resumen = {
+    OK:      { items: 0, diff: 0, valor: 0 },
+    REVISAR: { items: 0, diff: 0, valor: 0 },
+    ALERTA:  { items: 0, diff: 0, valor: 0 },
+  };
+
+  inventoryCajas.forEach((item) => {
+    if (!item) return;
+
+    if (item.fisicoCajas === null || item.fisicoCajas === "" || isNaN(item.fisicoCajas)) {
+      return;
+    }
+
+    const diff = calculateDiff(item.sistema, item.fisicoCajas);
+    const estado = getEstadoFromDiff(diff);
+    const grupo = resumen[estado];
+    if (!grupo) return;
+
+    const costo = item.costo || 0;
+
+    grupo.items += 1;
+    grupo.diff  += diff;
+    grupo.valor += -diff * costo;
+
+  });
+
+  return resumen;
+}
+
+// ---------- Pintar resumen en pantalla ----------
+function renderResumenEjecutivo() {
+  const cont = document.getElementById("resumenEjecutivo");
+  if (!cont) return;
+
+  const resumen = calcularResumenEjecutivo();
+
+  let html = `
+    <h3>Resumen ejecutivo</h3>
+    <table class="tabla-resumen">
+      <thead>
+        <tr>
+          <th>Estado</th>
+          <th>Productos</th>
+          <th>Diferencia total</th>
+          <th>Impacto ($)</th>
         </tr>
-      `;
-    }).join("");
+      </thead>
+      <tbody>
+  `;
 
-    if(!feeInput.dataset.bound){
-      feeInput.dataset.bound = "1";
-      feeInput.addEventListener("input", () => {
-        let st2 = readState() || {};
-        st2 = ensureCobroState(st2);
-        st2.fee = n2(feeInput.value);
-        writeState(st2);
-        recalcCobro();
-      });
+  const estados = ["OK", "REVISAR", "ALERTA"];
+  let totalImpacto = 0;
+
+  estados.forEach((estado) => {
+    const grupo = resumen[estado];
+    if (!grupo) return;
+
+    totalImpacto += grupo.valor;
+
+    html += `
+      <tr>
+        <td>${estado}</td>
+        <td>${grupo.items}</td>
+        <td>${grupo.diff}</td>
+        <td>${grupo.valor.toFixed(2)}</td>
+      </tr>
+    `;
+  });
+// ---------- Exportar resumen ejecutivo a Excel ----------
+function exportResumenEjecutivoExcel() {
+  try {
+    // Para comprobar que el botón sí dispara
+    alert("Generando archivo de resumen...");
+
+    const cont = document.getElementById("resumenEjecutivo");
+    if (!cont) {
+      alert("No hay contenedor de resumen ejecutivo.");
+      return;
     }
 
-    if(!tbody.dataset.bound){
-      tbody.dataset.bound = "1";
-      tbody.addEventListener("input", (e) => {
-        const inp = e.target.closest("input.pay-in");
-        if(!inp) return;
-        const tr = inp.closest("tr");
-        const i = parseInt(tr.dataset.i, 10);
-        const k = inp.dataset.k;
-        let st2 = readState() || {};
-        st2 = ensureCobroState(st2);
-        st2.payments[i][k] = n2(inp.value);
-        writeState(st2);
-        recalcCobro();
-      });
+    const tabla = cont.querySelector("table");
+    if (!tabla) {
+      alert("El resumen está vacío (no hay tabla para exportar).");
+      return;
     }
 
-    recalcCobro();
-  }
+    const filas = tabla.querySelectorAll("tbody tr");
+    if (!filas.length) {
+      alert("El resumen está vacío (no hay filas en la tabla).");
+      return;
+    }
 
-  function recalcCobro(){
-    const st = ensureCobroState(readState() || {});
-    const fee = n2(st.fee);
+    const aoa = [];
+    aoa.push(["Estado", "Ítems", "Diferencia total", "Impacto ($)"]);
 
-    const tbody = $("payTbody");
-    const totalEl = $("totalSaldo");
-    if(!tbody || !totalEl) return;
-
-    let totalSaldo = 0;
-
-    [...tbody.querySelectorAll("tr")].forEach(tr => {
-      const i = parseInt(tr.dataset.i, 10);
-      const p = st.payments[i] || {cash:0, yappy:0};
-      const paid = n2(p.cash) + n2(p.yappy);
-      const saldo = fee - paid;
-      totalSaldo += saldo;
-     const cell = tr.querySelector("[data-saldo]");
-cell.textContent = fmt2(saldo);
-cell.style.color = (saldo > 0.0001) ? "#ff5a5a" : "#2ee59d";
-
+    filas.forEach((tr) => {
+      const celdas = Array.from(tr.querySelectorAll("td")).map((td) =>
+        td.textContent.trim()
+      );
+      if (!celdas.length) return;
+      aoa.push(celdas);
     });
 
-    totalEl.textContent = fmt2(totalSaldo);
-    totalEl.classList.remove("total-ok","total-bad");
-    if(Math.abs(totalSaldo) < 0.0001) totalEl.classList.add("total-ok");
-    else if(totalSaldo > 0) totalEl.classList.add("total-bad");
-    else totalEl.classList.add("total-ok");
-}
-  function switchTab(which){
-  const isLista   = which === "lista";
-  const isEquipos = which === "equipos";
-  const isCobro   = which === "cobro";
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Resumen ejecutivo");
 
-  tabLista.classList.toggle("active", isLista);
-  tabEquipos.classList.toggle("active", isEquipos);
-  tabCobro.classList.toggle("active", isCobro);
-
-  viewLista.style.display   = isLista ? "" : "none";
-  viewEquipos.style.display = isEquipos ? "" : "none";
-  viewCobro.style.display   = isCobro ? "" : "none";
-
-  if(isEquipos) renderEquipos();
-  if(isCobro) renderCobro();
+    XLSX.writeFile(wb, "PIC_Resumen_Ejecutivo.xlsx");
+  } catch (err) {
+    console.error(err);
+    alert("Error exportando el resumen: " + err.message);
+  }
 }
 
+  // --- Fila TOTAL ---
+  const totalClass =
+    totalImpacto > 0 ? "total-ganancia" :
+    totalImpacto < 0 ? "total-perdida" :
+    "";
 
-  function init(){
-    // build inputs
-    gkGrid.appendChild(makeInput("gk1","Ingrese nombre de portero"));
-    gkGrid.appendChild(makeInput("gk2","Ingrese nombre de portero"));
-    for(let i=1;i<=PLAYERS_COUNT;i++){
-      plGrid.appendChild(makeInput("p"+i,"Ingrese nombre de jugador"));
-kit1.addEventListener("change", () => { applyKitDot(kitDot1, kit1.value); saveDraft(); });
-kit2.addEventListener("change", () => { applyKitDot(kitDot2, kit2.value); saveDraft(); });
-kit3.addEventListener("change", () => { applyKitDot(kitDot3, kit3.value); saveDraft(); });
+  html += `
+      <tr class="fila-total">
+        <td>Total ganancia / pérdida</td>
+        <td></td>
+        <td></td>
+        <td class="${totalClass}">${totalImpacto.toFixed(2)}</td>
+      </tr>
+      </tbody>
+    </table>
+  `;
 
+  cont.innerHTML = html;
+}
+  // BOTÓN EXPORTAR
+  btnExportResumen.addEventListener("click", () => {
+    exportResumenEjecutivoExcel();
+  });
 
-    }
+  // TOGGLE TEMA
+  const toggleBtn = document.getElementById("themeToggle");
 
-    // defaults
-    const st = readState();
-    if(!st?.match?.date) matchDate.value = defaultDate();
-    if(!st?.match?.time) matchTime.value = "19:00"; // 7pm default (editable)
+  // Cargar tema guardado
+  const savedTheme = localStorage.getItem("pic-theme") || "dark";
+  document.body.setAttribute("data-theme", savedTheme);
+  toggleBtn.textContent = savedTheme === "dark" ? "🌙" : "☀️";
 
-    if(st) setUIFromState(st);
-    else { saveDraft(); updateCount(); }
+  toggleBtn.addEventListener("click", () => {
+    const current = document.body.getAttribute("data-theme");
+    const next = current === "dark" ? "light" : "dark";
 
-    matchDate.addEventListener("change", () => { saveDraft(); });
-    matchTime.addEventListener("change", () => { saveDraft(); });
-
-    btnGuardar.addEventListener("click", () => { saveDraft(); showToast("Guardado ✅"); });
-
-    btnSortear.addEventListener("click", () => {
-      const ok = generateSorteoSlots();
-      if(ok) switchTab("equipos");
-    });
-
-    let rsTimer = null;
-
-btnReSortear.addEventListener("mousedown", () => {
-  rsTimer = setTimeout(() => {
-    const ok = generateSorteoSlots();
-    if(ok) showToast("Re-sorteado ✅");
-  }, 1200);
-});
-
-btnReSortear.addEventListener("mouseup", () => {
-  clearTimeout(rsTimer);
-  rsTimer = null;
-});
-
-btnReSortear.addEventListener("mouseleave", () => {
-  clearTimeout(rsTimer);
-  rsTimer = null;
-});
-btnExport.addEventListener("click", async () => {
-  const text = buildExportText();
-  try{
-    await navigator.clipboard.writeText(text);
-    showToast("Texto copiado ✅");
-  }catch(e){
-    // fallback por si el clipboard falla
-    const ta = document.createElement("textarea");
-    ta.value = text;
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand("copy");
-    ta.remove();
-    showToast("Texto copiado ✅");
-  }
-});
-
-// móvil
-btnReSortear.addEventListener("touchstart", (e) => {
-  e.preventDefault();
-  rsTimer = setTimeout(() => {
-    const ok = generateSorteoSlots();
-    if(ok) showToast("Re-sorteado ✅");
-  }, 1200);
-}, { passive:false });
-
-btnReSortear.addEventListener("touchend", () => {
-  clearTimeout(rsTimer);
-  rsTimer = null;
-});
-
-
-    btnReset.addEventListener("click", resetAll);
-
-    tabLista.addEventListener("click", () => switchTab("lista"));
-    tabEquipos.addEventListener("click", () => switchTab("equipos"));
-tabCobro.addEventListener("click", () => switchTab("cobro"));
-
-
-    // render if already exists
-    renderEquipos();
-  }
-
-  init();
-})();
+    document.body.setAttribute("data-theme", next);
+    localStorage.setItem("pic-theme", next);
+    toggleBtn.textContent = next === "dark" ? "🌙" : "☀️";
+  });
 </script>
 </body>
 </html>
+
