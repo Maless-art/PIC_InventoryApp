@@ -706,6 +706,32 @@ min-width: 100%;
 body[data-theme="light"] table {
   background: #ffffff;
   color: #111827;
+}/* ===== FIX COMPLETO TABLA MODO CLARO ===== */
+
+body[data-theme="light"] .table-wrapper {
+  background: #ffffff !important;
+  border-color: rgba(0,0,0,0.12);
+}
+
+body[data-theme="light"] tbody tr:nth-child(even),
+body[data-theme="light"] tbody tr:nth-child(odd) {
+  background: #ffffff !important;
+}
+
+body[data-theme="light"] tbody td {
+  color: #111827 !important;
+  border-bottom-color: rgba(0,0,0,0.08);
+}
+
+body[data-theme="light"] .table-wrapper thead th {
+  background: #f3f4f6 !important;
+  color: #374151 !important;
+}
+
+body[data-theme="light"] .input-count {
+  background: #ffffff !important;
+  color: #111827 !important;
+  border: 1px solid rgba(0,0,0,0.25);
 }
 
 body[data-theme="light"] th {
@@ -728,7 +754,13 @@ body[data-theme="light"] .codigo {
   opacity: 1 !important;
   font-weight: 600;
 }
+tbody tr:nth-child(even) {
+  background: rgba(15, 23, 42, 0.75);
+}
 
+tbody tr:nth-child(odd) {
+  background: rgba(15, 23, 42, 0.95);
+}
   </style>
 </head>
 <body data-theme="dark">
